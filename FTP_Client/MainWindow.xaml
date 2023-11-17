@@ -16,6 +16,16 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <ContextMenu x:Key="ListViewContextMenu">
+            <ItemsControl ItemsSource="{Binding ListViewContextMenuCommands}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <MenuItem Header="{Binding Text}" Command="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ContextMenu>
+
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="LightGray" />
             <Setter Property="Foreground" Value="Black" />
@@ -101,21 +111,21 @@
                     <Label Content="Адрес сервера: " />
 
                     <TextBox Grid.Column="1"
-                         Text="{Binding FtpConnectionSettings.ServerAddress}" />
+                             Text="{Binding FtpConnectionSettings.ServerAddress}" />
 
                     <Label Grid.Row="1" 
-                       Content="Логин: " />
+                           Content="Логин: " />
 
                     <TextBox Grid.Row="1"
-                         Grid.Column="1"
-                         Text="{Binding FtpConnectionSettings.Username}" />
+                             Grid.Column="1"
+                             Text="{Binding FtpConnectionSettings.Username}" />
 
                     <Label Grid.Row="2"  
-                       Content="Пароль: " />
+                           Content="Пароль: " />
 
                     <TextBox Grid.Row="2"
-                         Grid.Column="1"
-                         Text="{Binding FtpConnectionSettings.Password}"/>
+                             Grid.Column="1"
+                             Text="{Binding FtpConnectionSettings.Password}"/>
 
                     <Button Grid.Row="3"
                             Grid.ColumnSpan="2"
@@ -123,7 +133,7 @@
                             Padding="5"
                             Margin="5"
                             Content="Подключиться"
-                            Command="{Binding ConnectCommand}" />
+                            Command="{Binding ConnectFTPServerCommand}" />
 
                 </Grid>
             </StackPanel>
@@ -237,17 +247,21 @@
                         </Button.Content>
                     </Button>
 
+                    <Button Content="Create Folder" 
+                            Command="{Binding OpenNewFolderDialogCommand}" />
+
                     <TextBlock Margin="10"
                                VerticalAlignment="Center" 
-                               Text="{Binding CurrentPathServer}" />
-                    
+                               Text="{Binding CurrentPathServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
                 </StackPanel>
 
                 <ListView Grid.Row="1" 
                           Grid.Column="1" 
                           Margin="10"
                           ItemsSource="{Binding FilesAndFoldersServer}"
-                          SelectedItem="{Binding SelectedFileItemServer}">
+                          SelectedItem="{Binding SelectedFileItemServer}"
+                          ContextMenu="{StaticResource ListViewContextMenu}">
 
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
@@ -282,8 +296,8 @@
                           Margin="10" 
                           CanContentScroll="True">
                 <ListBox MaxHeight="100"
-                         ItemsSource="{Binding LogItems}" />
-                
+                         ItemsSource="{Binding LogItems, UpdateSourceTrigger=PropertyChanged}" />
+
             </ScrollViewer>
 
         </Grid>

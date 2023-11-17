@@ -1,7 +1,4 @@
-﻿using FTP_Client.Enums;
-using FTP_Client.Models;
-using FTP_Client.ViewModels;
-using System;
+﻿using FTP_Client.ViewModels;
 using System.IO;
 
 namespace FTP_Client.Commands
@@ -19,7 +16,6 @@ namespace FTP_Client.Commands
         {
             if ((string)parameter == "local")
             {
-
                 if (_mainViewModel.SelectedFileItemLocal != null)
                 {
                     if (_mainViewModel.SelectedFileItemLocal.FileType == "Drive")
@@ -36,7 +32,7 @@ namespace FTP_Client.Commands
             else if ((string)parameter == "server")
                 if (_mainViewModel.SelectedFileItemServer != null)
                 {
-                    if (_mainViewModel.SelectedFileItemServer != null/* && dataContext.SelectedFileItemServer.FileType == "Folder"*/)
+                    if (_mainViewModel.SelectedFileItemServer != null && _mainViewModel.SelectedFileItemServer.FileType == "Folder")
                     {
                         var folderPath = _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName + "/";
                         _mainViewModel.LoadFolder(folderPath);
