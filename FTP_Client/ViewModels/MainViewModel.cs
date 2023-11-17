@@ -1,4 +1,5 @@
 ﻿using FTP_Client.Commands;
+using FTP_Client.Commands.ContextMenuCommand;
 using FTP_Client.Commands.NewFolderDialogCommands;
 using FTP_Client.Models;
 using System;
@@ -6,18 +7,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
+using System.Windows.Input;
 
 namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        private CreateDirectoryOnFTPServerCommand _createDirectory;
-        public CreateDirectoryOnFTPServerCommand CreateDirectoryOnFTPServerCommand
-        {
-            get => _createDirectory;
-            set => SetProperty(ref _createDirectory, value);
-        }
+        public ObservableCollection<ICommand> ListViewContextMenuCommands { get; }
 
+
+        //todo: кнопку отмены для окна создания папки
         private CancelCommand _cancelCommand;
         public CancelCommand CancelCommand
         {
@@ -25,30 +24,24 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _cancelCommand, value);
         }
 
-
-
-
-
-
-
-        private OpenNewFolderDialogCommand _openNewFolderDialogCommand;
-        public OpenNewFolderDialogCommand OpenNewFolderDialogCommand
+        private DeleteFileCommand _deleteFileCommand;
+        public DeleteFileCommand DeleteFileCommand
         {
-            get => _openNewFolderDialogCommand;
-            set => SetProperty(ref _openNewFolderDialogCommand, value);
+            get => _deleteFileCommand;
+            set => SetProperty(ref _deleteFileCommand, value);
         }
-
-        private string _folderName;
-        public string FolderName
-        {
-            get => _folderName;
-            set => SetProperty(ref _folderName, value);
-        }
-
-
 
         public MainViewModel()
         {
+
+            ListViewContextMenuCommands = new ObservableCollection<ICommand>()
+            {
+
+            };
+
+            ListViewContextMenuCommands.Add(DeleteFileCommand = new DeleteFileCommand(this));
+
+
             OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this);
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
             CancelCommand = new CancelCommand();
@@ -86,6 +79,13 @@ namespace FTP_Client.ViewModels
         {
             get => _currentPathServer;
             set => SetProperty(ref _currentPathServer, value);
+        }
+
+        private string _folderName;
+        public string FolderName
+        {
+            get => _folderName;
+            set => SetProperty(ref _folderName, value);
         }
 
         private FtpConnectionSettings _ftpConnectionSettings = new();
@@ -254,6 +254,20 @@ namespace FTP_Client.ViewModels
         {
             get => _connectFTPServerCommand;
             set => SetProperty(ref _connectFTPServerCommand, value);
+        }
+
+        private CreateDirectoryOnFTPServerCommand _createDirectory;
+        public CreateDirectoryOnFTPServerCommand CreateDirectoryOnFTPServerCommand
+        {
+            get => _createDirectory;
+            set => SetProperty(ref _createDirectory, value);
+        }
+
+        private OpenNewFolderDialogCommand _openNewFolderDialogCommand;
+        public OpenNewFolderDialogCommand OpenNewFolderDialogCommand
+        {
+            get => _openNewFolderDialogCommand;
+            set => SetProperty(ref _openNewFolderDialogCommand, value);
         }
         #endregion Commands
     }

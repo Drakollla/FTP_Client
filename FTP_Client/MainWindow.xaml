@@ -20,7 +20,7 @@
             <ItemsControl ItemsSource="{Binding ListViewContextMenuCommands}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <MenuItem Header="{Binding Text}" Command="{Binding}" />
+                        <MenuItem Header="{Binding CommandName}" Command="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -83,7 +83,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
 
     </Window.Resources>
 
