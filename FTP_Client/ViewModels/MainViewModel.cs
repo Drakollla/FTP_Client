@@ -1,6 +1,7 @@
 ﻿using FTP_Client.Commands;
 using FTP_Client.Commands.ContextMenuCommand;
 using FTP_Client.Commands.NewFolderDialogCommands;
+using FTP_Client.Helpers;
 using FTP_Client.Models;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace FTP_Client.ViewModels
 {
@@ -31,23 +33,33 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _deleteFileCommand, value);
         }
 
+        private DownloadFileCommand _loadFromFTPServer;
+        public DownloadFileCommand LoadFromFTPServer
+        {
+            get => _loadFromFTPServer;
+            set => SetProperty(ref _loadFromFTPServer, value);
+        }
+
         public MainViewModel()
         {
-
             ListViewContextMenuCommands = new ObservableCollection<ICommand>()
             {
 
             };
 
+            ListViewContextMenuCommands.Add(OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this));
+            ListViewContextMenuCommands.Add(LoadFromFTPServer = new DownloadFileCommand(this));
             ListViewContextMenuCommands.Add(DeleteFileCommand = new DeleteFileCommand(this));
 
-
-            OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this);
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
             CancelCommand = new CancelCommand();
 
 
             CurrentPathServer = "/";
+            //temp
+            LoadFolder(CurrentPathServer);
+            //temp
+
 
             BackCommand = new BackCommand(this);
             ForwardCommand = new ForwardCommand(this);
@@ -65,7 +77,7 @@ namespace FTP_Client.ViewModels
         public Stack<string> ForwardStackServer = new();
         public ObservableCollection<FileItem> FilesAndFoldersLocal { get; set; } = new();
         public ObservableCollection<FileItem> FilesAndFoldersServer { get; set; } = new();
-        public ObservableCollection<string> LogItems { get; set; } = new();
+        public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public string _currentPathLocal;
         public string CurrentPathLocal
@@ -118,7 +130,8 @@ namespace FTP_Client.ViewModels
         #endregion FieldsAndProperty
 
         #region PublicMethods
-        public void AddLogItem(string logItem) => LogItems.Add(logItem);
+        public void AddLogMessage(string mesaage, SolidColorBrush color) =>
+            LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color});
 
         private void LoadDrives()
         {
@@ -143,14 +156,9 @@ namespace FTP_Client.ViewModels
 
             try
             {
-                AddLogItem("Подключение к FTP серверу...");
-
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(FtpConnectionSettings.ServerAddress + folderPath);
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-
                 request.Credentials = new NetworkCredential(FtpConnectionSettings.Username, FtpConnectionSettings.Password);
-
-                AddLogItem("Загрузка содержимого на FTP сервере...");
 
                 FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 Stream responseStream = response.GetResponseStream();
@@ -179,12 +187,14 @@ namespace FTP_Client.ViewModels
                 foreach (var file in files)
                     FilesAndFoldersServer.Add(file);
 
+                AddLogMessage($"Загрузка содержимого на FTP сервере завершена: {response.StatusDescription}", Brushes.Green);
+
                 reader.Close();
                 response.Close();
             }
             catch (Exception ex)
             {
-                AddLogItem("Error: " + ex.Message);
+                AddLogMessage("Error: " + ex.Message, Brushes.Red);
             }
         }
 
@@ -222,7 +232,7 @@ namespace FTP_Client.ViewModels
             }
             catch (Exception ex)
             {
-                AddLogItem("Error: " + ex.Message);
+                AddLogMessage("Error: " + ex.Message, Brushes.Red);
             }
         }
         #endregion PublicMethods

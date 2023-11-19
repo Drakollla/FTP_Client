@@ -1,6 +1,7 @@
 ﻿using FTP_Client.ViewModels;
 using System;
 using System.Net;
+using System.Windows.Media;
 
 namespace FTP_Client.Commands.NewFolderDialogCommands
 {
@@ -26,7 +27,7 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
                 var response = (FtpWebResponse)request.GetResponse();
                 response.Close();
 
-                _mainViewModel.AddLogItem("Папка успешно создана на FTP сервере");
+                _mainViewModel.AddLogMessage($"Папка успешно создана на FTP сервере: {response.StatusDescription}", Brushes.Green);
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
             }
             catch (WebException ex)
@@ -34,13 +35,13 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
                 var response = (FtpWebResponse)ex.Response;
 
                 if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                    _mainViewModel.AddLogItem("Папка уже существует на FTP сервере");
+                    _mainViewModel.AddLogMessage("Папка уже существует на FTP сервере", Brushes.Orange);
                 else
-                    _mainViewModel.AddLogItem("Ошибка при создании папки на FTP сервере: " + ex.Message);
+                    _mainViewModel.AddLogMessage("Ошибка при создании папки на FTP сервере: " + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
-                _mainViewModel.AddLogItem("Ошибка при создании папки на FTP сервере: " + ex.Message);
+                _mainViewModel.AddLogMessage("Ошибка при создании папки на FTP сервере: " + ex.Message, Brushes.Red);
             }
         }
     }

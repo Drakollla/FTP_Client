@@ -1,13 +1,11 @@
 ﻿using FTP_Client.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
+using System.Windows.Media;
 
 namespace FTP_Client.Commands.ContextMenuCommand
 {
-    //todo:удаление файла
+    //todo:удаление папки
     public class DeleteFileCommand : MenuContextBaseCommand
     {
         private readonly MainViewModel _mainViewModel;
@@ -25,24 +23,22 @@ namespace FTP_Client.Commands.ContextMenuCommand
             {
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(_mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName);
                 request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
-                //request.Method = WebRequestMethods.Ftp.RemoveDirectory;
                 request.Method = WebRequestMethods.Ftp.DeleteFile;
 
                 FtpWebResponse response = (FtpWebResponse)request.GetResponse();
 
-                _mainViewModel.AddLogItem($"Удаление файла завершено: {response.StatusDescription}");
+                _mainViewModel.AddLogMessage($"Удаление файла завершено: {response.StatusDescription}", Brushes.Green);
 
                 response.Close();
             }
             catch (WebException ex)
             {
                 var response = (FtpWebResponse)ex.Response;
-
-                _mainViewModel.AddLogItem("Ошибка при удалении папки на FTP сервере: " + ex.Message);
+                _mainViewModel.AddLogMessage("Ошибка при удалении папки на FTP сервере: " + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
-                _mainViewModel.AddLogItem("Ошибка при удалении папки на FTP сервере: " + ex.Message);
+                _mainViewModel.AddLogMessage("Ошибка при удалении папки на FTP сервере: " + ex.Message, Brushes.Red);
             }
         }
     }

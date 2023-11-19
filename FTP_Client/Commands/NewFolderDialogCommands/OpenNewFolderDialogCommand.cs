@@ -1,9 +1,10 @@
-﻿using FTP_Client.ViewModels;
+﻿using FTP_Client.Commands.ContextMenuCommand;
+using FTP_Client.ViewModels;
 using System.Windows;
 
 namespace FTP_Client.Commands.NewFolderDialogCommands
 {
-    public class OpenNewFolderDialogCommand : BaseCommand
+    public class OpenNewFolderDialogCommand : MenuContextBaseCommand
     {
         private readonly MainViewModel _mainViewModel;
 
@@ -11,6 +12,8 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
         {
             _mainViewModel = mainViewModel;
         }
+
+        public override string CommandName => "Создать папку";
 
         public override void Execute(object parameter)
         {

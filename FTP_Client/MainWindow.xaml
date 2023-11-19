@@ -245,10 +245,6 @@
                                   StrokeThickness="1" />
                         </Button.Content>
                     </Button>
-
-                    <Button Content="Create Folder" 
-                            Command="{Binding OpenNewFolderDialogCommand}" />
-
                     <TextBlock Margin="10"
                                VerticalAlignment="Center" 
                                Text="{Binding CurrentPathServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -295,7 +291,14 @@
                           Margin="10" 
                           CanContentScroll="True">
                 <ListBox MaxHeight="100"
-                         ItemsSource="{Binding LogItems, UpdateSourceTrigger=PropertyChanged}" />
+                         ItemsSource="{Binding LogMessages}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Text}"
+                                       Foreground="{Binding MessageColor}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
             </ScrollViewer>
 
