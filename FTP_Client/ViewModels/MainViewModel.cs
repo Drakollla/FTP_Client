@@ -1,6 +1,7 @@
 ﻿using FTP_Client.Commands;
 using FTP_Client.Commands.ContextMenuCommand;
 using FTP_Client.Commands.NewFolderDialogCommands;
+using FTP_Client.Commands.RenameDialogCo;
 using FTP_Client.Helpers;
 using FTP_Client.Models;
 using System;
@@ -40,6 +41,28 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _loadFromFTPServer, value);
         }
 
+        private OpenRenameDialogCommand _openRenameDialogCommand;
+        public OpenRenameDialogCommand OpenRenameDialogCommand
+        {
+            get => _openRenameDialogCommand;
+            set => SetProperty(ref _openRenameDialogCommand, value);
+        }
+
+        private RenameCommand _renameCommand;
+        public RenameCommand RenameCommand
+        {
+            get => _renameCommand;
+            set => SetProperty(ref _renameCommand, value);
+        }
+
+
+        private string _newName;
+        public string NewName
+        {
+            get => _newName;
+            set => SetProperty(ref _newName, value);
+        }
+
         public MainViewModel()
         {
             ListViewContextMenuCommands = new ObservableCollection<ICommand>()
@@ -49,10 +72,14 @@ namespace FTP_Client.ViewModels
 
             ListViewContextMenuCommands.Add(OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this));
             ListViewContextMenuCommands.Add(LoadFromFTPServer = new DownloadFileCommand(this));
+            ListViewContextMenuCommands.Add(OpenRenameDialogCommand = new OpenRenameDialogCommand(this));
             ListViewContextMenuCommands.Add(DeleteFileCommand = new DeleteFileCommand(this));
 
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
             CancelCommand = new CancelCommand();
+
+
+            RenameCommand = new RenameCommand(this);
 
 
             CurrentPathServer = "/";
