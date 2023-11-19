@@ -33,10 +33,10 @@ namespace FTP_Client.Commands.RenameDialogCo
                 request.Method = WebRequestMethods.Ftp.Rename;
                 request.RenameTo = newFileName;
 
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
-                {
-                    _mainViewModel.AddLogMessage($"Файл успешно переименован: {response.StatusDescription}", Brushes.Green);
-                }
+                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                _mainViewModel.AddLogMessage($"Файл успешно переименован: {response.StatusDescription}", Brushes.Green);
+
+                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
             }
             catch (WebException ex)
             {
