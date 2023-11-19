@@ -70,6 +70,21 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _updateCommand, value);
         }
 
+
+        private string _txtFileContent;
+        public string TxtFileContent
+        {
+            get => _txtFileContent;
+            set => SetProperty(ref _txtFileContent, value);
+        }
+
+        private ViewFileCommand _viewFileCommand;
+        public ViewFileCommand ViewFileCommand
+        {
+            get => _viewFileCommand;
+            set => SetProperty(ref _viewFileCommand, value);
+        }
+
         public MainViewModel()
         {
             ListViewContextMenuCommands = new ObservableCollection<ICommand>()
@@ -78,6 +93,7 @@ namespace FTP_Client.ViewModels
             };
 
             ListViewContextMenuCommands.Add(OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this));
+            ListViewContextMenuCommands.Add(ViewFileCommand = new ViewFileCommand(this));
             ListViewContextMenuCommands.Add(LoadFromFTPServer = new DownloadFileCommand(this));
             ListViewContextMenuCommands.Add(OpenRenameDialogCommand = new OpenRenameDialogCommand(this));
             ListViewContextMenuCommands.Add(DeleteFileCommand = new DeleteFileCommand(this));
