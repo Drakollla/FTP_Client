@@ -16,82 +16,18 @@ namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        public ObservableCollection<ICommand> ListViewContextMenuCommands { get; }
-
-
-        //todo: кнопку отмены для окна создания папки
-        private CancelCommand _cancelCommand;
-        public CancelCommand CancelCommand
-        {
-            get => _cancelCommand;
-            set => SetProperty(ref _cancelCommand, value);
-        }
-
-        private DeleteFileCommand _deleteFileCommand;
-        public DeleteFileCommand DeleteFileCommand
-        {
-            get => _deleteFileCommand;
-            set => SetProperty(ref _deleteFileCommand, value);
-        }
-
-        private DownloadFileCommand _loadFromFTPServer;
-        public DownloadFileCommand LoadFromFTPServer
-        {
-            get => _loadFromFTPServer;
-            set => SetProperty(ref _loadFromFTPServer, value);
-        }
-
-        private OpenRenameDialogCommand _openRenameDialogCommand;
-        public OpenRenameDialogCommand OpenRenameDialogCommand
-        {
-            get => _openRenameDialogCommand;
-            set => SetProperty(ref _openRenameDialogCommand, value);
-        }
-
-        private RenameCommand _renameCommand;
-        public RenameCommand RenameCommand
-        {
-            get => _renameCommand;
-            set => SetProperty(ref _renameCommand, value);
-        }
-
-
-        private string _newName;
-        public string NewName
-        {
-            get => _newName;
-            set => SetProperty(ref _newName, value);
-        }
-
-        private UpdateCommand _updateCommand;
-        public UpdateCommand UpdateCommand
-        {
-            get => _updateCommand;
-            set => SetProperty(ref _updateCommand, value);
-        }
-
-
-        private string _txtFileContent;
-        public string TxtFileContent
-        {
-            get => _txtFileContent;
-            set => SetProperty(ref _txtFileContent, value);
-        }
-
-        private ViewFileCommand _viewFileCommand;
-        public ViewFileCommand ViewFileCommand
-        {
-            get => _viewFileCommand;
-            set => SetProperty(ref _viewFileCommand, value);
-        }
-
         public MainViewModel()
         {
-            ListViewContextMenuCommands = new ObservableCollection<ICommand>()
-            {
+            CurrentPathServer = "/";
+            //temp
+            LoadFolder(CurrentPathServer);
 
-            };
+            InitializingCommands();
+            LoadDrives();
+        }
 
+        private void InitializingCommands()
+        {
             ListViewContextMenuCommands.Add(OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this));
             ListViewContextMenuCommands.Add(ViewFileCommand = new ViewFileCommand(this));
             ListViewContextMenuCommands.Add(LoadFromFTPServer = new DownloadFileCommand(this));
@@ -99,28 +35,15 @@ namespace FTP_Client.ViewModels
             ListViewContextMenuCommands.Add(DeleteFileCommand = new DeleteFileCommand(this));
             ListViewContextMenuCommands.Add(UpdateCommand = new UpdateCommand(this));
 
-
-
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
-            CancelCommand = new CancelCommand();
-
-
             RenameCommand = new RenameCommand(this);
-
-
-            CurrentPathServer = "/";
-            //temp
-            LoadFolder(CurrentPathServer);
-            //temp
-
+            CancelCommand = new CancelCommand(this);
 
             BackCommand = new BackCommand(this);
             ForwardCommand = new ForwardCommand(this);
             MouseClickCommand = new MouseClickCommand(this);
             ConnectFTPServerCommand = new ConnectFTPServerCommand(this);
             FtpConnectionSettings = new FtpConnectionSettings();
-
-            LoadDrives();
         }
 
         #region FieldsAndProperty
@@ -130,6 +53,7 @@ namespace FTP_Client.ViewModels
         public Stack<string> ForwardStackServer = new();
         public ObservableCollection<FileItem> FilesAndFoldersLocal { get; set; } = new();
         public ObservableCollection<FileItem> FilesAndFoldersServer { get; set; } = new();
+        public ObservableCollection<ICommand> ListViewContextMenuCommands { get; } = new();
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public string _currentPathLocal;
@@ -174,17 +98,24 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _selectedFileItemServer, value);
         }
 
-        private bool _isConnected;
-        public bool IsConnected
+        private string _newName;
+        public string NewName
         {
-            get => _isConnected;
-            set => SetProperty(ref _isConnected, value);
+            get => _newName;
+            set => SetProperty(ref _newName, value);
+        }
+
+        private string _txtFileContent;
+        public string TxtFileContent
+        {
+            get => _txtFileContent;
+            set => SetProperty(ref _txtFileContent, value);
         }
         #endregion FieldsAndProperty
 
         #region PublicMethods
         public void AddLogMessage(string mesaage, SolidColorBrush color) =>
-            LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color});
+            LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color });
 
         private void LoadDrives()
         {
@@ -331,6 +262,55 @@ namespace FTP_Client.ViewModels
         {
             get => _openNewFolderDialogCommand;
             set => SetProperty(ref _openNewFolderDialogCommand, value);
+        }
+
+        private DeleteFileCommand _deleteFileCommand;
+        public DeleteFileCommand DeleteFileCommand
+        {
+            get => _deleteFileCommand;
+            set => SetProperty(ref _deleteFileCommand, value);
+        }
+
+        private DownloadFileCommand _loadFromFTPServer;
+        public DownloadFileCommand LoadFromFTPServer
+        {
+            get => _loadFromFTPServer;
+            set => SetProperty(ref _loadFromFTPServer, value);
+        }
+
+        private OpenRenameDialogCommand _openRenameDialogCommand;
+        public OpenRenameDialogCommand OpenRenameDialogCommand
+        {
+            get => _openRenameDialogCommand;
+            set => SetProperty(ref _openRenameDialogCommand, value);
+        }
+
+        private RenameCommand _renameCommand;
+        public RenameCommand RenameCommand
+        {
+            get => _renameCommand;
+            set => SetProperty(ref _renameCommand, value);
+        }
+
+        private UpdateCommand _updateCommand;
+        public UpdateCommand UpdateCommand
+        {
+            get => _updateCommand;
+            set => SetProperty(ref _updateCommand, value);
+        }
+
+        private ViewFileCommand _viewFileCommand;
+        public ViewFileCommand ViewFileCommand
+        {
+            get => _viewFileCommand;
+            set => SetProperty(ref _viewFileCommand, value);
+        }
+
+        private CancelCommand _cancelCommand;
+        public CancelCommand CancelCommand
+        {
+            get => _cancelCommand;
+            set => SetProperty(ref _cancelCommand, value);
         }
         #endregion Commands
     }

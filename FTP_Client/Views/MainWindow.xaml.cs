@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace FTP_Client
+namespace FTP_Client.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

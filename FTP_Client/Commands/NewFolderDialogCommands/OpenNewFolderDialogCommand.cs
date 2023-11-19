@@ -1,5 +1,6 @@
 ﻿using FTP_Client.Commands.ContextMenuCommand;
 using FTP_Client.ViewModels;
+using FTP_Client.Views;
 using System.Windows;
 
 namespace FTP_Client.Commands.NewFolderDialogCommands
@@ -23,9 +24,7 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
                 Owner = Application.Current.MainWindow,
             };
 
-            if (newFolderDialog.ShowDialog() == true)
-            {
-            }
+            if (newFolderDialog.ShowDialog() == true) { }
         }
     }
 }
