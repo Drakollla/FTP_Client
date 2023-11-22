@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace FTP_Client.Commands.ContextMenuCommand
 {
@@ -61,5 +62,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
                     _mainViewModel.AddLogMessage("Ошибка: Файл недоступен на FTP сервере" + ex.Message, Brushes.Red);
             }
         }
+    
+
     }
 }

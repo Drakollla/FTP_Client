@@ -16,22 +16,14 @@ namespace FTP_Client.Commands.RenameDialogCo
 
         public override void Execute(object parameter)
         {
-            RenameFileOnFtp(_mainViewModel.FtpConnectionSettings.ServerAddress,
-              _mainViewModel.FtpConnectionSettings.Username,
-              _mainViewModel.FtpConnectionSettings.Password,
-              _mainViewModel.SelectedFileItemServer.FileName,
-              _mainViewModel.NewName
-              );
-        }
+            var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
 
-        public void RenameFileOnFtp(string serverUri, string username, string password, string currentFileName, string newFileName)
-        {
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUri + _mainViewModel.CurrentPathServer + currentFileName);
-                request.Credentials = new NetworkCredential(username, password);
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(requestUriString);
+                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
                 request.Method = WebRequestMethods.Ftp.Rename;
-                request.RenameTo = newFileName;
+                request.RenameTo = _mainViewModel.NewFileName;
 
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 _mainViewModel.AddLogMessage($"Файл успешно переименован: {response.StatusDescription}", Brushes.Green);

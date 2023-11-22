@@ -11,11 +11,21 @@ using System.IO;
 using System.Net;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
+
+        private BitmapImage _imageSource;
+        public BitmapImage ImageSource
+        {
+            get => _imageSource;
+            set => SetProperty(ref _imageSource, value);
+        }
+
+
         public MainViewModel()
         {
             CurrentPathServer = "/";
@@ -37,7 +47,7 @@ namespace FTP_Client.ViewModels
 
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
             RenameCommand = new RenameCommand(this);
-            CancelCommand = new CancelCommand(this);
+            CancelCommand = new CancelCommand();
 
             BackCommand = new BackCommand(this);
             ForwardCommand = new ForwardCommand(this);
@@ -98,11 +108,11 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _selectedFileItemServer, value);
         }
 
-        private string _newName;
-        public string NewName
+        private string _newFileName;
+        public string NewFileName
         {
-            get => _newName;
-            set => SetProperty(ref _newName, value);
+            get => _newFileName;
+            set => SetProperty(ref _newFileName, value);
         }
 
         private string _txtFileContent;

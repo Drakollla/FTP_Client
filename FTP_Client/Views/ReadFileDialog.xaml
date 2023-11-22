@@ -6,7 +6,9 @@
         xmlns:vm="clr-namespace:FTP_Client.ViewModels"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
-        Title="ReadFileDialog" Height="450" Width="800">
+        Title="Просмотр содержимого файла"
+        Height="450"
+        Width="800">
 
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -18,5 +20,7 @@
                  AcceptsReturn="True" 
                  VerticalScrollBarVisibility="Auto" 
                  HorizontalScrollBarVisibility="Auto" />
+
+        <Image Source="{Binding ImageSource, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </Window>

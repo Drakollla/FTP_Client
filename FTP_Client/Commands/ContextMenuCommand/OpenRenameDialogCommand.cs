@@ -24,11 +24,9 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 Owner = Application.Current.MainWindow,
             };
             
-            _mainViewModel.NewName = _mainViewModel.SelectedFileItemServer.FileName;
+            _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
 
-            if (renameDialog.ShowDialog() == true)
-            {
-            }
+            if (renameDialog.ShowDialog() == true) { }
         }
     }
 }
