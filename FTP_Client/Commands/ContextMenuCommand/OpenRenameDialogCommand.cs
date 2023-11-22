@@ -13,7 +13,6 @@ namespace FTP_Client.Commands.ContextMenuCommand
             _mainViewModel = mainViewModel;
         }
 
-        //todo: менять текст в зависимости папка или файл будет переименовываться
         public override string CommandName => "Переименовать";
 
         public override void Execute(object parameter)
@@ -23,7 +22,6 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 DataContext = _mainViewModel,
                 Owner = Application.Current.MainWindow,
             };
-            
             _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
 
             if (renameDialog.ShowDialog() == true) { }

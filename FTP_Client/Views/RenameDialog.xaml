@@ -18,7 +18,7 @@
         <StackPanel Margin="10">
             <TextBlock Text="Введите название:" />
 
-            <TextBox Text="{Binding NewName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Text="{Binding NewFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Margin="0 5" />
 
             <StackPanel Orientation="Horizontal" 

@@ -15,7 +15,10 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override void Execute(object parameter)
         {
-            _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+            if ((string)parameter == "local")
+                _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
+            else if ((string)parameter == "server")
+                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
         }
     }
 }

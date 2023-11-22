@@ -44,7 +44,6 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 }
                 else if (textExtensions.Contains(fileExtension.ToLower()))
                 {
-
                     _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(
                         _mainViewModel.FtpConnectionSettings.ServerAddress,
                         _mainViewModel.FtpConnectionSettings.Username,
@@ -66,11 +65,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 Owner = Application.Current.MainWindow,
             };
 
-
-
-            if (readFileDialog.ShowDialog() == true)
-            {
-            }
+            if (readFileDialog.ShowDialog() == true) { }
         }
 
         public string DownloadAndReadTextFileFromFtp(string serverUri, string username, string password, string filePath)

@@ -1,5 +1,4 @@
-﻿using FTP_Client.Enums;
-using System;
+﻿using System;
 
 namespace FTP_Client.Models
 {

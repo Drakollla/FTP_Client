@@ -17,13 +17,17 @@
 
     <Window.Resources>
         <ContextMenu x:Key="ListViewContextMenu">
-            <ItemsControl ItemsSource="{Binding ListViewContextMenuCommands}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <MenuItem Header="{Binding CommandName}" Command="{Binding}" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <MenuItem Header="{Binding DownloadFileCommand.CommandName}" Command="{Binding DownloadFileCommand}" />
+            <MenuItem Header="{Binding ViewFileCommand.CommandName}" Command="{Binding ViewFileCommand}" CommandParameter="server" />
+            <MenuItem Header="{Binding UpdateCommand.CommandName}" Command="{Binding UpdateCommand}" CommandParameter="server" />
+            <MenuItem Header="{Binding OpenRenameDialogCommand.CommandName}" Command="{Binding OpenRenameDialogCommand}" />
+            <MenuItem Header="{Binding DeleteFileCommand.CommandName}" Command="{Binding DeleteFileCommand}" CommandParameter="server" />
+        </ContextMenu>
+
+        <ContextMenu x:Key="ListViewContextMenuLocal">
+            <MenuItem Header="{Binding UploadFileCommand.CommandName}" Command="{Binding UploadFileCommand}" />
+            <MenuItem Header="{Binding UpdateCommand.CommandName}" Command="{Binding UpdateCommand}" CommandParameter="local" />
+            <MenuItem Header="{Binding DeleteFileCommand.CommandName}" Command="{Binding DeleteFileCommand}" CommandParameter="local" />
         </ContextMenu>
 
         <Style TargetType="TextBox">
@@ -149,6 +153,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <!--for local-->
             <Grid MinWidth="200">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -185,7 +190,8 @@
                 <ListView Grid.Row="1" 
                           Margin="10" 
                           ItemsSource="{Binding FilesAndFoldersLocal}" 
-                          SelectedItem="{Binding SelectedFileItemLocal}">
+                          SelectedItem="{Binding SelectedFileItemLocal}"
+                          ContextMenu="{StaticResource ListViewContextMenuLocal}">
 
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">

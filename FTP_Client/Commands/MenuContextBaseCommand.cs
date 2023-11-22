@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace FTP_Client.Commands.ContextMenuCommand
+namespace FTP_Client.Commands
 {
     public abstract class MenuContextBaseCommand : ICommand
     {
@@ -12,6 +12,5 @@ namespace FTP_Client.Commands.ContextMenuCommand
         public virtual bool CanExecute(object? parameter) => true;
 
         public abstract void Execute(object parameter);
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using FTP_Client.Commands.ContextMenuCommand;
-using FTP_Client.ViewModels;
+﻿using FTP_Client.ViewModels;
 using FTP_Client.Views;
 using System.Windows;
 

@@ -18,11 +18,11 @@ namespace FTP_Client.ViewModels
     public class MainViewModel : ObservableObject
     {
 
-        private BitmapImage _imageSource;
-        public BitmapImage ImageSource
+        private UploadFileCommand _uploadFileCommand;
+        public UploadFileCommand UploadFileCommand
         {
-            get => _imageSource;
-            set => SetProperty(ref _imageSource, value);
+            get => _uploadFileCommand;
+            set => SetProperty(ref _uploadFileCommand, value);
         }
 
 
@@ -38,16 +38,18 @@ namespace FTP_Client.ViewModels
 
         private void InitializingCommands()
         {
-            ListViewContextMenuCommands.Add(OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this));
-            ListViewContextMenuCommands.Add(ViewFileCommand = new ViewFileCommand(this));
-            ListViewContextMenuCommands.Add(LoadFromFTPServer = new DownloadFileCommand(this));
-            ListViewContextMenuCommands.Add(OpenRenameDialogCommand = new OpenRenameDialogCommand(this));
-            ListViewContextMenuCommands.Add(DeleteFileCommand = new DeleteFileCommand(this));
-            ListViewContextMenuCommands.Add(UpdateCommand = new UpdateCommand(this));
+            OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this);
+            ViewFileCommand = new ViewFileCommand(this);
+            DownloadFileCommand = new DownloadFileCommand(this);
+            OpenRenameDialogCommand = new OpenRenameDialogCommand(this);
+            DeleteFileCommand = new DeleteFileCommand(this);
+            UpdateCommand = new UpdateCommand(this);
 
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
             RenameCommand = new RenameCommand(this);
             CancelCommand = new CancelCommand();
+
+            UploadFileCommand = new UploadFileCommand(this);
 
             BackCommand = new BackCommand(this);
             ForwardCommand = new ForwardCommand(this);
@@ -120,6 +122,13 @@ namespace FTP_Client.ViewModels
         {
             get => _txtFileContent;
             set => SetProperty(ref _txtFileContent, value);
+        }
+
+        private BitmapImage _imageSource;
+        public BitmapImage ImageSource
+        {
+            get => _imageSource;
+            set => SetProperty(ref _imageSource, value);
         }
         #endregion FieldsAndProperty
 
@@ -232,8 +241,8 @@ namespace FTP_Client.ViewModels
         #endregion PublicMethods
 
         #region Commands
-        private BaseCommand _backCommand;
-        public BaseCommand BackCommand
+        private BackCommand _backCommand;
+        public BackCommand BackCommand
         {
             get => _backCommand;
             set => SetProperty(ref _backCommand, value);
@@ -281,11 +290,11 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _deleteFileCommand, value);
         }
 
-        private DownloadFileCommand _loadFromFTPServer;
-        public DownloadFileCommand LoadFromFTPServer
+        private DownloadFileCommand _downloadFileCommand;
+        public DownloadFileCommand DownloadFileCommand
         {
-            get => _loadFromFTPServer;
-            set => SetProperty(ref _loadFromFTPServer, value);
+            get => _downloadFileCommand;
+            set => SetProperty(ref _downloadFileCommand, value);
         }
 
         private OpenRenameDialogCommand _openRenameDialogCommand;

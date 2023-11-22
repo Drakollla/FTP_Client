@@ -1,4 +1,5 @@
 ﻿using FTP_Client.ViewModels;
+using System;
 using System.IO;
 using System.Net;
 using System.Windows.Media;
@@ -53,16 +54,20 @@ namespace FTP_Client.Commands.ContextMenuCommand
                     }
 
                     _mainViewModel.AddLogMessage($"Файл скачан: {response.StatusDescription}", Brushes.Green);
+
+                    _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
                 }
             }
             catch (WebException ex)
             {
                 FtpWebResponse response = (FtpWebResponse)ex.Response;
                 if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                    _mainViewModel.AddLogMessage("Ошибка: Файл недоступен на FTP сервере" + ex.Message, Brushes.Red);
+                    _mainViewModel.AddLogMessage($"Ошибка: Файл недоступен на FTP сервере: {response.StatusDescription}", Brushes.Red);
+            }
+            catch (Exception ex)
+            {
+                _mainViewModel.AddLogMessage("Ошибка при удалении папки на FTP сервере: " + ex.Message, Brushes.Red);
             }
         }
-    
-
     }
 }
