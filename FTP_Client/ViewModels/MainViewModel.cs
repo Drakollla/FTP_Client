@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -17,20 +16,11 @@ namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-
-        private UploadFileCommand _uploadFileCommand;
-        public UploadFileCommand UploadFileCommand
-        {
-            get => _uploadFileCommand;
-            set => SetProperty(ref _uploadFileCommand, value);
-        }
-
+        public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public MainViewModel()
         {
             CurrentPathServer = "/";
-            //temp
-            LoadFolder(CurrentPathServer);
 
             InitializingCommands();
             LoadDrives();
@@ -57,30 +47,11 @@ namespace FTP_Client.ViewModels
             ConnectFTPServerCommand = new ConnectFTPServerCommand(this);
             FtpConnectionSettings = new FtpConnectionSettings();
         }
+        
+        public void AddLogMessage(string mesaage, SolidColorBrush color) =>
+            LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color });
 
         #region FieldsAndProperty
-        public Stack<string> BackStackLocal = new();
-        public Stack<string> ForwardStackLocal = new();
-        public Stack<string> BackStackServer = new();
-        public Stack<string> ForwardStackServer = new();
-        public ObservableCollection<FileItem> FilesAndFoldersLocal { get; set; } = new();
-        public ObservableCollection<FileItem> FilesAndFoldersServer { get; set; } = new();
-        public ObservableCollection<ICommand> ListViewContextMenuCommands { get; } = new();
-        public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
-
-        public string _currentPathLocal;
-        public string CurrentPathLocal
-        {
-            get => _currentPathLocal;
-            set => SetProperty(ref _currentPathLocal, value);
-        }
-
-        public string _currentPathServer;
-        public string CurrentPathServer
-        {
-            get => _currentPathServer;
-            set => SetProperty(ref _currentPathServer, value);
-        }
 
         private string _folderName;
         public string FolderName
@@ -94,20 +65,6 @@ namespace FTP_Client.ViewModels
         {
             get => _ftpConnectionSettings;
             set => SetProperty(ref _ftpConnectionSettings, value);
-        }
-
-        private FileItem _selectedFileItemLocal;
-        public FileItem SelectedFileItemLocal
-        {
-            get => _selectedFileItemLocal;
-            set => SetProperty(ref _selectedFileItemLocal, value);
-        }
-
-        private FileItem _selectedFileItemServer;
-        public FileItem SelectedFileItemServer
-        {
-            get => _selectedFileItemServer;
-            set => SetProperty(ref _selectedFileItemServer, value);
         }
 
         private string _newFileName;
@@ -132,10 +89,75 @@ namespace FTP_Client.ViewModels
         }
         #endregion FieldsAndProperty
 
-        #region PublicMethods
-        public void AddLogMessage(string mesaage, SolidColorBrush color) =>
-            LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color });
+        #region Commands
+        private BackCommand _backCommand;
+        public BackCommand BackCommand
+        {
+            get => _backCommand;
+            set => SetProperty(ref _backCommand, value);
+        }
 
+        private ForwardCommand _forwardCommand;
+        public ForwardCommand ForwardCommand
+        {
+            get => _forwardCommand;
+            set => SetProperty(ref _forwardCommand, value);
+        }
+
+        private DeleteFileCommand _deleteFileCommand;
+        public DeleteFileCommand DeleteFileCommand
+        {
+            get => _deleteFileCommand;
+            set => SetProperty(ref _deleteFileCommand, value);
+        }
+
+        private UpdateCommand _updateCommand;
+        public UpdateCommand UpdateCommand
+        {
+            get => _updateCommand;
+            set => SetProperty(ref _updateCommand, value);
+        }
+
+        private ViewFileCommand _viewFileCommand;
+        public ViewFileCommand ViewFileCommand
+        {
+            get => _viewFileCommand;
+            set => SetProperty(ref _viewFileCommand, value);
+        }
+
+        private CancelCommand _cancelCommand;
+        public CancelCommand CancelCommand
+        {
+            get => _cancelCommand;
+            set => SetProperty(ref _cancelCommand, value);
+        }
+        #endregion Commands
+
+
+        #region LocalFileManager
+
+        #region LoaclProperty
+        public Stack<string> BackStackLocal = new();
+        public Stack<string> ForwardStackLocal = new();
+
+        public ObservableCollection<FileItem> FilesAndFoldersLocal { get; set; } = new();
+
+        public string _currentPathLocal;
+        public string CurrentPathLocal
+        {
+            get => _currentPathLocal;
+            set => SetProperty(ref _currentPathLocal, value);
+        }
+
+        private FileItem _selectedFileItemLocal;
+        public FileItem SelectedFileItemLocal
+        {
+            get => _selectedFileItemLocal;
+            set => SetProperty(ref _selectedFileItemLocal, value);
+        }
+        #endregion LoaclProperty
+
+        #region LocalMethod
         private void LoadDrives()
         {
             foreach (var drive in DriveInfo.GetDrives())
@@ -152,6 +174,79 @@ namespace FTP_Client.ViewModels
             }
         }
 
+        public void NavigateToFolder(string folderPath)
+        {
+            try
+            {
+                CurrentPathLocal = folderPath;
+
+                FilesAndFoldersLocal.Clear();
+
+                foreach (var directory in Directory.GetDirectories(folderPath))
+                {
+                    var dirInfo = new DirectoryInfo(directory);
+
+                    FilesAndFoldersLocal.Add(new FileItem
+                    {
+                        FileName = dirInfo.Name,
+                        FileType = "Folder",
+                        Size = 0
+                    });
+                }
+
+                foreach (var file in Directory.GetFiles(folderPath))
+                {
+                    var fileInfo = new FileInfo(file);
+
+                    FilesAndFoldersLocal.Add(new FileItem
+                    {
+                        FileName = fileInfo.Name,
+                        FileType = fileInfo.Extension,
+                        Size = fileInfo.Length
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage("Error: " + ex.Message, Brushes.Red);
+            }
+        }
+        #endregion LocalMethod
+
+
+        private UploadFileCommand _uploadFileCommand;
+        public UploadFileCommand UploadFileCommand
+        {
+            get => _uploadFileCommand;
+            set => SetProperty(ref _uploadFileCommand, value);
+        }
+
+        #endregion LocalFileManager
+
+
+        #region FtpFileManager
+
+        #region FtpProperty
+        public Stack<string> BackStackServer = new();
+        public Stack<string> ForwardStackServer = new();
+        public ObservableCollection<FileItem> FilesAndFoldersServer { get; set; } = new();
+
+        public string _currentPathServer;
+        public string CurrentPathServer
+        {
+            get => _currentPathServer;
+            set => SetProperty(ref _currentPathServer, value);
+        }
+
+        private FileItem _selectedFileItemServer;
+        public FileItem SelectedFileItemServer
+        {
+            get => _selectedFileItemServer;
+            set => SetProperty(ref _selectedFileItemServer, value);
+        }
+        #endregion FtpProperty
+
+        #region FtpMethod
         public void LoadFolder(string folderPath)
         {
             if (FilesAndFoldersServer.Count != 0)
@@ -200,61 +295,9 @@ namespace FTP_Client.ViewModels
                 AddLogMessage("Error: " + ex.Message, Brushes.Red);
             }
         }
+        #endregion FtpMethod
 
-        public void NavigateToFolder(string folderPath)
-        {
-            try
-            {
-                CurrentPathLocal = folderPath;
-
-                FilesAndFoldersLocal.Clear();
-
-                foreach (var directory in Directory.GetDirectories(folderPath))
-                {
-                    var dirInfo = new DirectoryInfo(directory);
-
-                    FilesAndFoldersLocal.Add(new FileItem
-                    {
-                        FileName = dirInfo.Name,
-                        FileType = "Folder",
-                        Size = 0
-                    });
-                }
-
-                foreach (var file in Directory.GetFiles(folderPath))
-                {
-                    var fileInfo = new FileInfo(file);
-
-                    FilesAndFoldersLocal.Add(new FileItem
-                    {
-                        FileName = fileInfo.Name,
-                        FileType = fileInfo.Extension,
-                        Size = fileInfo.Length
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                AddLogMessage("Error: " + ex.Message, Brushes.Red);
-            }
-        }
-        #endregion PublicMethods
-
-        #region Commands
-        private BackCommand _backCommand;
-        public BackCommand BackCommand
-        {
-            get => _backCommand;
-            set => SetProperty(ref _backCommand, value);
-        }
-
-        private ForwardCommand _forwardCommand;
-        public ForwardCommand ForwardCommand
-        {
-            get => _forwardCommand;
-            set => SetProperty(ref _forwardCommand, value);
-        }
-
+        #region FtpCommands
         private MouseClickCommand _mouseClickCommand;
         public MouseClickCommand MouseClickCommand
         {
@@ -283,13 +326,6 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _openNewFolderDialogCommand, value);
         }
 
-        private DeleteFileCommand _deleteFileCommand;
-        public DeleteFileCommand DeleteFileCommand
-        {
-            get => _deleteFileCommand;
-            set => SetProperty(ref _deleteFileCommand, value);
-        }
-
         private DownloadFileCommand _downloadFileCommand;
         public DownloadFileCommand DownloadFileCommand
         {
@@ -310,27 +346,8 @@ namespace FTP_Client.ViewModels
             get => _renameCommand;
             set => SetProperty(ref _renameCommand, value);
         }
+        #endregion FtpCommands
 
-        private UpdateCommand _updateCommand;
-        public UpdateCommand UpdateCommand
-        {
-            get => _updateCommand;
-            set => SetProperty(ref _updateCommand, value);
-        }
-
-        private ViewFileCommand _viewFileCommand;
-        public ViewFileCommand ViewFileCommand
-        {
-            get => _viewFileCommand;
-            set => SetProperty(ref _viewFileCommand, value);
-        }
-
-        private CancelCommand _cancelCommand;
-        public CancelCommand CancelCommand
-        {
-            get => _cancelCommand;
-            set => SetProperty(ref _cancelCommand, value);
-        }
-        #endregion Commands
+        #endregion FtpFileManager
     }
 }

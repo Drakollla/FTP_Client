@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace FTP_Client.Commands.ContextMenuCommand
 {
@@ -20,43 +19,30 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override void Execute(object parameter)
         {
-            DownloadFileFromFtp(
-                _mainViewModel.FtpConnectionSettings.ServerAddress,
-                _mainViewModel.FtpConnectionSettings.Username,
-                _mainViewModel.FtpConnectionSettings.Password,
-                _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName,
-                _mainViewModel.CurrentPathLocal);
-        }
-
-        public void DownloadFileFromFtp(string serverUri, string username, string password, string remoteFilePath, string localFolderPath)
-        {
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUri + remoteFilePath);
-                request.Credentials = new NetworkCredential(username, password);
+                var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
+                var request = (FtpWebRequest)WebRequest.Create(requestUriString);
+                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
 
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                using var response = (FtpWebResponse)request.GetResponse();
+                using (var responseStream = response.GetResponseStream())
                 {
-                    using (Stream responseStream = response.GetResponseStream())
+                    var localFilePath = _mainViewModel.CurrentPathLocal + @"\" + _mainViewModel.SelectedFileItemServer.FileName;
+
+                    using var fileStream = new FileStream(localFilePath, FileMode.CreateNew);
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = responseStream.Read(buffer, 0, buffer.Length)) > 0)
                     {
-                        var localFilePath = localFolderPath + @"\" + _mainViewModel.SelectedFileItemServer.FileName;
-
-                        using (FileStream fileStream = new FileStream(localFilePath, FileMode.CreateNew))
-                        {
-                            byte[] buffer = new byte[1024];
-                            int bytesRead;
-                            while ((bytesRead = responseStream.Read(buffer, 0, buffer.Length)) > 0)
-                            {
-                                fileStream.Write(buffer, 0, bytesRead);
-                            }
-                        }
+                        fileStream.Write(buffer, 0, bytesRead);
                     }
-
-                    _mainViewModel.AddLogMessage($"Файл скачан: {response.StatusDescription}", Brushes.Green);
-
-                    _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
                 }
+
+                _mainViewModel.AddLogMessage($"Файл скачан: {response.StatusDescription}", Brushes.Green);
+
+                _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
             }
             catch (WebException ex)
             {

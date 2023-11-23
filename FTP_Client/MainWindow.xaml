@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FTP_Client.ViewModels"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:converter="clr-namespace:FTP_Client.Converters"
         mc:Ignorable="d"
         Title="FTP-клиент"
         WindowStartupLocation="CenterScreen"
+        Background="#D8E6EF"
         Height="450" 
         Width="800">
 
@@ -16,6 +18,16 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
+
+        <Style x:Key="ColumnHoverStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#CAD7DC" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="{Binding DownloadFileCommand.CommandName}" Command="{Binding DownloadFileCommand}" />
             <MenuItem Header="{Binding ViewFileCommand.CommandName}" Command="{Binding ViewFileCommand}" CommandParameter="server" />
@@ -31,9 +43,7 @@
         </ContextMenu>
 
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="LightGray" />
             <Setter Property="Foreground" Value="Black" />
-            <Setter Property="BorderBrush" Value="Gray" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="5" />
             <Setter Property="Margin" Value="5" />
@@ -50,39 +60,27 @@
             <Setter Property="MinHeight" Value="20" />
         </Style>
 
-        <Style x:Key="ExpanderArrowStyle" TargetType="ToggleButton">
+        <Style x:Key="RoundButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Margin" Value="0 5 5 0" />
+
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Grid>
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="ExpansionStates">
-                                    <VisualState x:Name="Collapsed">
-                                        <Storyboard>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"  
+                                CornerRadius="5" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" />
+                        </Border>
 
-
-                                            <DoubleAnimation Storyboard.TargetName="Arrow" 
-                                                             Storyboard.TargetProperty="RenderTransform.Angle" 
-                                                             To="180" Duration="0:0:0.2" />
-
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="Expanded">
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="Arrow" 
-                                                             Storyboard.TargetProperty="RenderTransform.Angle" 
-                                                             To="0" 
-                                                             Duration="0:0:0.2" />
-                                        </Storyboard>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                            <Path x:Name="Arrow" Fill="Pink" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M0,0 L4,4 L8,0" RenderTransformOrigin="0.5,0.5">
-                                <Path.RenderTransform>
-                                    <RotateTransform Angle="0" />
-                                </Path.RenderTransform>
-                            </Path>
-                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#5D7581" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -133,9 +131,11 @@
                     <Button Grid.Row="3"
                             Grid.ColumnSpan="2"
                             MaxWidth="150"
+                            MinHeight="30"
                             Padding="5"
                             Margin="5"
                             Content="Подключиться"
+                            Style="{StaticResource RoundButtonStyle}"
                             Command="{Binding ConnectFTPServerCommand}" />
 
                 </Grid>
@@ -164,7 +164,8 @@
                             Orientation="Horizontal">
                     <Button Width="30"
                             Command="{Binding BackCommand}"
-                            CommandParameter="local">
+                            CommandParameter="local"
+                            Style="{StaticResource RoundButtonStyle}">
                         <Button.Content>
                             <Path Data="M4,0 L0,4 L4,8" 
                                   Stroke="Black" 
@@ -174,7 +175,8 @@
 
                     <Button Width="30"
                             Command="{Binding ForwardCommand}"
-                            CommandParameter="local">
+                            CommandParameter="local"
+                            Style="{StaticResource RoundButtonStyle}">
                         <Button.Content>
                             <Path Data="M0,0 L4,4 L0,8" 
                                   Stroke="Black" 
@@ -215,9 +217,20 @@
                                             DisplayMemberBinding="{Binding FileType}" />
 
                             <GridViewColumn Header="Размер" 
-                                            DisplayMemberBinding="{Binding Size}" />
+                                            DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
                         </GridView>
                     </ListView.View>
+                    
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#CAD7DC" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
                 </ListView>
             </Grid>
 
@@ -234,7 +247,8 @@
 
                     <Button Width="30"
                             Command="{Binding BackCommand}"
-                            CommandParameter="server">
+                            CommandParameter="server"
+                            Style="{StaticResource RoundButtonStyle}">
                         <Button.Content>
                             <Path Data="M4,0 L0,4 L4,8" 
                                   Stroke="Black" 
@@ -244,13 +258,15 @@
 
                     <Button Width="30" 
                             Command="{Binding ForwardCommand}"
-                            CommandParameter="server">
+                            CommandParameter="server"
+                            Style="{StaticResource RoundButtonStyle}">
                         <Button.Content>
                             <Path Data="M0,0 L4,4 L0,8" 
                                   Stroke="Black" 
                                   StrokeThickness="1" />
                         </Button.Content>
                     </Button>
+                    
                     <TextBlock Margin="10"
                                VerticalAlignment="Center" 
                                Text="{Binding CurrentPathServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -286,9 +302,20 @@
                                             DisplayMemberBinding="{Binding FileType}" />
 
                             <GridViewColumn Header="Размер" 
-                                            DisplayMemberBinding="{Binding Size}" />
+                                            DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
                         </GridView>
                     </ListView.View>
+
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#CAD7DC" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
                 </ListView>
             </Grid>
 
