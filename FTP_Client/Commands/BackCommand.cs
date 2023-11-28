@@ -27,7 +27,7 @@ namespace FTP_Client.Commands
                 if (_mainViewModel.BackStackServer.Count > 1)
                 {
                     _mainViewModel.ForwardStackServer.Push(_mainViewModel.BackStackServer.Pop());
-                    string previousFolderPath = _mainViewModel.BackStackServer.Peek();
+                    var previousFolderPath = _mainViewModel.BackStackServer.Peek();
                     _mainViewModel.LoadFolder(previousFolderPath);
                     _mainViewModel.CurrentPathServer = previousFolderPath;
                 }

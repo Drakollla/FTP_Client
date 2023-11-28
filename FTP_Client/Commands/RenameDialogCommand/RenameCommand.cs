@@ -21,11 +21,9 @@ namespace FTP_Client.Commands.RenameDialogCo
 
         private void RenameOnFtpServer()
         {
-            var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
-
             try
             {
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.GetFilePatnOnFTP);
                 request.Method = WebRequestMethods.Ftp.Rename;
                 request.RenameTo = _mainViewModel.NewFileName;
 

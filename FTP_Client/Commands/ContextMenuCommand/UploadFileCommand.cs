@@ -19,15 +19,14 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override void Execute(object? parameter)
         {
-            var ftpServerUrl = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + @"/" + _mainViewModel.SelectedFileItemLocal.FileName;
-            var filePath = _mainViewModel.CurrentPathLocal + @"\" + _mainViewModel.SelectedFileItemLocal.FileName;
+            var ftpServerUrl = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemLocal.FileName;
 
             try
             {
                 var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(ftpServerUrl);
                 request.Method = WebRequestMethods.Ftp.UploadFile;
 
-                using (var fileStream = File.OpenRead(filePath))
+                using (var fileStream = File.OpenRead(_mainViewModel.GetFilePath))
                 using (var ftpStream = request.GetRequestStream())
                 {
                     fileStream.CopyTo(ftpStream);

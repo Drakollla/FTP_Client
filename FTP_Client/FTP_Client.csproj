@@ -8,7 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <None Remove="ftp.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\ftp.ico" />
   </ItemGroup>
 
   <ItemGroup>

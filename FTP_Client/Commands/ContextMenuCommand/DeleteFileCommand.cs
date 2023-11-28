@@ -19,24 +19,22 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override void Execute(object? parameter)
         {
-            if ((string)parameter == "local")
+            if (parameter as string == "local")
                 DeleteLocal();
-            else if ((string)parameter == "server")
+            else if (parameter as string == "server")
                 DeleteOnFtpServer();
         }
 
         private void DeleteLocal()
         {
-            var path = _mainViewModel.CurrentPathLocal + @"\" + _mainViewModel.SelectedFileItemLocal.FileName;
-
-            if (_mainViewModel.SelectedFileItemLocal.FileType == "Folder" && Directory.Exists(path))
+            if (_mainViewModel.SelectedFileItemLocal.FileType == "Folder" && Directory.Exists(_mainViewModel.GetFilePath))
             {
-                Directory.Delete(path, true);
+                Directory.Delete(_mainViewModel.GetFilePath, true);
                 _mainViewModel.AddLogMessage($"Папка {_mainViewModel.SelectedFileItemLocal.FileName} успешно удалена.", Brushes.Green);
             }
             else
             {
-                File.Delete(path);
+                File.Delete(_mainViewModel.GetFilePath);
                 _mainViewModel.AddLogMessage($"Файл {_mainViewModel.SelectedFileItemLocal.FileName} успешно удален.", Brushes.Green);
             }
 
@@ -45,11 +43,9 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         private void DeleteOnFtpServer()
         {
-            var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
-            
             try
             {
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.GetFilePatnOnFTP);
                 request.Method = WebRequestMethods.Ftp.DeleteFile;
 
                 using var response = (FtpWebResponse)request.GetResponse();

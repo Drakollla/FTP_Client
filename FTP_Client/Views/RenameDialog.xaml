@@ -6,6 +6,7 @@
         xmlns:vm="clr-namespace:FTP_Client.ViewModels"
         mc:Ignorable="d"
         Title="Переименовать"
+        Icon="/FTP_Client;component/Resources/ftp.ico"
         WindowStartupLocation="CenterOwner"
         Width="350"
         Height="150">

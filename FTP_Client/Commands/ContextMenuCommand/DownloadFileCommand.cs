@@ -21,8 +21,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
         {
             try
             {
-                var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.GetFilePatnOnFTP);
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
 
                 using var response = (FtpWebResponse)request.GetResponse();

@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         Title="FTP-клиент"
         WindowStartupLocation="CenterScreen"
+        Icon="Resources/ftp.ico"
         Background="#D8E6EF"
         Height="450" 
         Width="800">

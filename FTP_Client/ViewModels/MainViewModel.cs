@@ -159,6 +159,8 @@ namespace FTP_Client.ViewModels
             get => _selectedFileItemLocal;
             set => SetProperty(ref _selectedFileItemLocal, value);
         }
+
+        public string GetFilePath => CurrentPathLocal + @"\" + SelectedFileItemLocal.FileName;
         #endregion LoaclProperty
 
         #region LocalMethod
@@ -248,6 +250,8 @@ namespace FTP_Client.ViewModels
             get => _selectedFileItemServer;
             set => SetProperty(ref _selectedFileItemServer, value);
         }
+
+        public string GetFilePatnOnFTP => FtpConnectionSettings.ServerAddress + CurrentPathServer + SelectedFileItemServer.FileName;
         #endregion FtpProperty
 
         #region FtpMethod
