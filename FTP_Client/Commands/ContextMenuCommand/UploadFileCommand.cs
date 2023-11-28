@@ -1,11 +1,7 @@
 ﻿using FTP_Client.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.ContextMenuCommand
@@ -21,16 +17,14 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Загрузить файл на сеервер";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             var ftpServerUrl = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + @"/" + _mainViewModel.SelectedFileItemLocal.FileName;
-
             var filePath = _mainViewModel.CurrentPathLocal + @"\" + _mainViewModel.SelectedFileItemLocal.FileName;
 
             try
             {
-                var request = (FtpWebRequest)WebRequest.Create(ftpServerUrl);
-                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(ftpServerUrl);
                 request.Method = WebRequestMethods.Ftp.UploadFile;
 
                 using (var fileStream = File.OpenRead(filePath))
@@ -45,8 +39,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
             }
             catch (WebException ex)
             {
-                var response = (FtpWebResponse)ex.Response;
-
+                var response = ex.Response as FtpWebResponse;
                 if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
                     _mainViewModel.AddLogMessage($"Ошибка при попытке загрузить файл на сервер: {response.StatusDescription}", Brushes.Orange);
                 else

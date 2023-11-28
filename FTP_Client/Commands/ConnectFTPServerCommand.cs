@@ -12,7 +12,7 @@ namespace FTP_Client.Commands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             _mainViewModel.AddLogMessage("Подключение к FTP серверу...", Brushes.Black);
             _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);

@@ -17,7 +17,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Удалить файл";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             if ((string)parameter == "local")
                 DeleteLocal();
@@ -37,7 +37,6 @@ namespace FTP_Client.Commands.ContextMenuCommand
             else
             {
                 File.Delete(path);
-                Console.WriteLine("Файл успешно удален.");
                 _mainViewModel.AddLogMessage($"Файл {_mainViewModel.SelectedFileItemLocal.FileName} успешно удален.", Brushes.Green);
             }
 
@@ -46,22 +45,23 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         private void DeleteOnFtpServer()
         {
+            var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
+            
             try
             {
-                var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
-                var request = (FtpWebRequest)WebRequest.Create(requestUriString);
-                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
                 request.Method = WebRequestMethods.Ftp.DeleteFile;
 
                 using var response = (FtpWebResponse)request.GetResponse();
+                
                 _mainViewModel.AddLogMessage($"Удаление файла завершено: {response.StatusDescription}", Brushes.Green);
-
+                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
                 response.Close();
             }
             catch (WebException ex)
             {
-                var response = (FtpWebResponse)ex.Response;
-                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response.StatusDescription}", Brushes.Red);
+                var response = ex.Response as FtpWebResponse;
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}", Brushes.Red);
             }
             catch (Exception ex)
             {

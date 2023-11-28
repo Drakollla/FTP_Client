@@ -15,7 +15,7 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
 
         public override string CommandName => "Создать папку";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             var newFolderDialog = new NewFolderDialog()
             {

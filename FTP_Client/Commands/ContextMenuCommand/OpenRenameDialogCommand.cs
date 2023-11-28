@@ -15,13 +15,14 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Переименовать";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             var renameDialog = new RenameDialog()
             {
                 DataContext = _mainViewModel,
                 Owner = Application.Current.MainWindow,
             };
+
             _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
 
             if (renameDialog.ShowDialog() == true) { }

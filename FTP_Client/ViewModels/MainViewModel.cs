@@ -20,8 +20,12 @@ namespace FTP_Client.ViewModels
 
         public MainViewModel()
         {
-            CurrentPathServer = "/";
+            Initialize();
+        }
 
+        private void Initialize()
+        {
+            CurrentPathServer = "/";
             InitializingCommands();
             LoadDrives();
         }
@@ -47,7 +51,7 @@ namespace FTP_Client.ViewModels
             ConnectFTPServerCommand = new ConnectFTPServerCommand(this);
             FtpConnectionSettings = new FtpConnectionSettings();
         }
-        
+
         public void AddLogMessage(string mesaage, SolidColorBrush color) =>
             LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color });
 
@@ -254,17 +258,17 @@ namespace FTP_Client.ViewModels
 
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(FtpConnectionSettings.ServerAddress + folderPath);
+                var request = FtpConnectionSettings.CreateFtpRequest(FtpConnectionSettings.ServerAddress + folderPath);
+
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-                request.Credentials = new NetworkCredential(FtpConnectionSettings.Username, FtpConnectionSettings.Password);
 
-                FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(responseStream);
+                using var response = (FtpWebResponse)request.GetResponse();
+                var responseStream = response.GetResponseStream();
+                var reader = new StreamReader(responseStream);
 
-                List<FileItem> files = new List<FileItem>();
+                var files = new List<FileItem>();
 
-                string line = reader.ReadLine();
+                var line = reader.ReadLine();
                 while (line != null)
                 {
                     string[] tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -275,9 +279,18 @@ namespace FTP_Client.ViewModels
 
                     var size = long.Parse(tokens[4]);
 
-                    var dateModified = DateTime.Parse(tokens[5] + " " + tokens[6] + " " + tokens[7]);
+                    string month = tokens[5];
+                    int day = int.Parse(tokens[6]);
+                    string[] timeParts = tokens[7].Split(':');
+                    int hour = int.Parse(timeParts[0]);
+                    int minute = int.Parse(timeParts[1]);
 
-                    files.Add(new FileItem { FileName = name, Size = size, LastModified = dateModified, FileType = fileType });
+                    DateTime now = DateTime.Now;
+                    int year = now.Year; // Предполагаем, что текущий год - это год файла
+
+                    DateTime fileDateTime = new DateTime(year, GetMonthNumber(month), day, hour, minute, 0);
+
+                    files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
 
                     line = reader.ReadLine();
                 }
@@ -294,6 +307,12 @@ namespace FTP_Client.ViewModels
             {
                 AddLogMessage("Error: " + ex.Message, Brushes.Red);
             }
+        }
+
+        static int GetMonthNumber(string month)
+        {
+            DateTime dt = DateTime.ParseExact(month, "MMM", System.Globalization.CultureInfo.InvariantCulture);
+            return dt.Month;
         }
         #endregion FtpMethod
 

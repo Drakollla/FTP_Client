@@ -17,13 +17,12 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Скачать";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             try
             {
                 var requestUriString = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName;
-                var request = (FtpWebRequest)WebRequest.Create(requestUriString);
-                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
 
                 using var response = (FtpWebResponse)request.GetResponse();
@@ -46,8 +45,8 @@ namespace FTP_Client.Commands.ContextMenuCommand
             }
             catch (WebException ex)
             {
-                FtpWebResponse response = (FtpWebResponse)ex.Response;
-                if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
+                var response = ex.Response as FtpWebResponse;
+                if (response?.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
                     _mainViewModel.AddLogMessage($"Ошибка: Файл недоступен на FTP сервере: {response.StatusDescription}", Brushes.Red);
             }
             catch (Exception ex)

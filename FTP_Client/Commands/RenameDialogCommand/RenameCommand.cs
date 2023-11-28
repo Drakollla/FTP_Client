@@ -14,7 +14,7 @@ namespace FTP_Client.Commands.RenameDialogCo
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
             RenameOnFtpServer();
         }
@@ -25,19 +25,18 @@ namespace FTP_Client.Commands.RenameDialogCo
 
             try
             {
-                var request = (FtpWebRequest)WebRequest.Create(requestUriString);
-                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
                 request.Method = WebRequestMethods.Ftp.Rename;
                 request.RenameTo = _mainViewModel.NewFileName;
 
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                using var response = (FtpWebResponse)request.GetResponse();
                 _mainViewModel.AddLogMessage($"Файл успешно переименован: {response.StatusDescription}", Brushes.Green);
 
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
             }
             catch (WebException ex)
             {
-                var response = (FtpWebResponse)ex.Response;
+                var response = ex.Response as FtpWebResponse;
                 _mainViewModel.AddLogMessage("Ошибка при попытке переименовать файла/папки на FTP сервере: " + ex.Message, Brushes.Red);
             }
             catch (Exception ex)

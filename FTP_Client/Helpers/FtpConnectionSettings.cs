@@ -1,4 +1,7 @@
-﻿namespace FTP_Client.Models
+﻿using FTP_Client.Models;
+using System.Net;
+
+namespace FTP_Client.Helpers
 {
     public class FtpConnectionSettings : ObservableObject
     {
@@ -28,6 +31,13 @@
         {
             get => _password;
             set => SetProperty(ref _password, value);
+        }
+
+        public FtpWebRequest CreateFtpRequest(string stringUriRequest)
+        {
+            var request = (FtpWebRequest)WebRequest.Create(stringUriRequest);
+            request.Credentials = new NetworkCredential(Username, Password);
+            return request;
         }
     }
 }

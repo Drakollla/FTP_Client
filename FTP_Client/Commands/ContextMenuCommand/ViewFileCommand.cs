@@ -21,10 +21,10 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Просмотр";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
-            string fileName = _mainViewModel.SelectedFileItemServer.FileName;
-            string fileExtension = Path.GetExtension(fileName);
+            var fileName = _mainViewModel.SelectedFileItemServer.FileName;
+            var fileExtension = Path.GetExtension(fileName);
 
             if (!string.IsNullOrEmpty(fileExtension))
             {
@@ -33,23 +33,13 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
                 if (imageExtensions.Contains(fileExtension.ToLower()))
                 {
-                    DownloadImageFromFtp(
-                             _mainViewModel.FtpConnectionSettings.ServerAddress,
-                    _mainViewModel.FtpConnectionSettings.Username,
-                    _mainViewModel.FtpConnectionSettings.Password,
-                    _mainViewModel.SelectedFileItemServer.FileName
-                    );
-
-
+                    DownloadImageFromFtp(_mainViewModel.FtpConnectionSettings.ServerAddress,
+                    _mainViewModel.SelectedFileItemServer.FileName);
                 }
                 else if (textExtensions.Contains(fileExtension.ToLower()))
                 {
-                    _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(
-                        _mainViewModel.FtpConnectionSettings.ServerAddress,
-                        _mainViewModel.FtpConnectionSettings.Username,
-                        _mainViewModel.FtpConnectionSettings.Password,
-                        _mainViewModel.SelectedFileItemServer.FileName
-                        );
+                    _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(_mainViewModel.FtpConnectionSettings.ServerAddress,
+                        _mainViewModel.SelectedFileItemServer.FileName);
 
                     _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
                 }
@@ -68,28 +58,23 @@ namespace FTP_Client.Commands.ContextMenuCommand
             if (readFileDialog.ShowDialog() == true) { }
         }
 
-        public string DownloadAndReadTextFileFromFtp(string serverUri, string username, string password, string filePath)
+        public string DownloadAndReadTextFileFromFtp(string serverUri, string filePath)
         {
+            var requestUriString = serverUri + _mainViewModel.CurrentPathServer + filePath;
+
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUri + _mainViewModel.CurrentPathServer + filePath);
-                request.Credentials = new NetworkCredential(username, password);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
 
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
-                {
-                    using (Stream responseStream = response.GetResponseStream())
-                    {
-                        using (StreamReader reader = new StreamReader(responseStream))
-                        {
-                            return reader.ReadToEnd();
-                        }
-                    }
-                }
+                using var response = (FtpWebResponse)request.GetResponse();
+                using var responseStream = response.GetResponseStream();
+                using var reader = new StreamReader(responseStream);
+                return reader.ReadToEnd();
             }
             catch (WebException ex)
             {
-                var response = (FtpWebResponse)ex.Response;
+                var response = ex.Response as FtpWebResponse;
                 _mainViewModel.AddLogMessage("Ошибка при попытке просмотреть содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
 
                 return string.Empty;
@@ -102,29 +87,33 @@ namespace FTP_Client.Commands.ContextMenuCommand
             }
         }
 
-        public void DownloadImageFromFtp(string serverUri, string username, string password, string remoteImagePath)
+        public void DownloadImageFromFtp(string serverUri, string remoteImagePath)
         {
+            var requestUriString = serverUri + _mainViewModel.CurrentPathServer + remoteImagePath;
+
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(serverUri + _mainViewModel.CurrentPathServer + remoteImagePath);
-                request.Credentials = new NetworkCredential(username, password);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
                 request.Method = WebRequestMethods.Ftp.DownloadFile;
 
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                using var response = (FtpWebResponse)request.GetResponse();
+                using var responseStream = response.GetResponseStream();
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = responseStream;
+                image.EndInit();
+
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    using (Stream responseStream = response.GetResponseStream())
-                    {
-                        var image = new BitmapImage();
-                        image.BeginInit();
-                        image.CacheOption = BitmapCacheOption.OnLoad;
-                        image.StreamSource = responseStream;
-                        image.EndInit();
-
-                        _mainViewModel.ImageSource = new();
-
-                        _mainViewModel.ImageSource = image;
-                    }
-                }
+                    _mainViewModel.ImageSource = image;
+                });
+                response.Close();
+            }
+            catch (WebException ex)
+            {
+                var response = ex.Response as FtpWebResponse;
+                _mainViewModel.AddLogMessage("Ошибка при попытке просмотреть содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {

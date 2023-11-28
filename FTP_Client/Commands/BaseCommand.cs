@@ -9,6 +9,6 @@ namespace FTP_Client.Commands
 
         public virtual bool CanExecute(object? parameter) => true;
 
-        public abstract void Execute(object parameter);
+        public abstract void Execute(object? parameter);
     }
 }

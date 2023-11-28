@@ -13,11 +13,11 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Обновить";
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
-            if ((string)parameter == "local")
+            if (parameter as string == "local")
                 _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
-            else if ((string)parameter == "server")
+            else if (parameter as string == "server")
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
         }
     }

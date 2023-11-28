@@ -11,9 +11,9 @@ namespace FTP_Client.Commands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
-            if ((string)parameter == "local")
+            if (parameter as string == "local")
             {
                 if (_mainViewModel.ForwardStackLocal.Count > 0)
                 {
@@ -22,7 +22,7 @@ namespace FTP_Client.Commands
                     _mainViewModel.NavigateToFolder(nextPath);
                 }
             }
-            else if ((string)parameter == "server")
+            else if (parameter as string == "server")
             {
                 if (_mainViewModel.ForwardStackServer.Count > 0)
                 {

@@ -14,16 +14,15 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object parameter)
+        public override void Execute(object? parameter)
         {
+            var ftpFolder = "/" + _mainViewModel.FolderName;
+
             try
             {
-                var ftpFolder = "/" + _mainViewModel.FolderName;
                 var ftpPath = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + ftpFolder;
-
-                var request = (FtpWebRequest)WebRequest.Create(ftpPath);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(ftpPath);
                 request.Method = WebRequestMethods.Ftp.MakeDirectory;
-                request.Credentials = new NetworkCredential(_mainViewModel.FtpConnectionSettings.Username, _mainViewModel.FtpConnectionSettings.Password);
                 var response = (FtpWebResponse)request.GetResponse();
                 response.Close();
 
@@ -32,9 +31,8 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
             }
             catch (WebException ex)
             {
-                var response = (FtpWebResponse)ex.Response;
-
-                if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
+                var response = ex.Response as FtpWebResponse;
+                if (response?.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
                     _mainViewModel.AddLogMessage("Папка уже существует на FTP сервере", Brushes.Orange);
                 else
                     _mainViewModel.AddLogMessage("Ошибка при создании папки на FTP сервере: " + ex.Message, Brushes.Red);

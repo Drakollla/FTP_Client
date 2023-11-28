@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:FTP_Client.ViewModels"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="Просмотр содержимого файла"
@@ -22,5 +23,6 @@
                  HorizontalScrollBarVisibility="Auto" />
 
         <Image Source="{Binding ImageSource, UpdateSourceTrigger=PropertyChanged}" />
+
     </Grid>
 </Window>
