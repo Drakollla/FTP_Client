@@ -21,14 +21,6 @@
     <Window.Resources>
         <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
 
-        <Style x:Key="ColumnHoverStyle" TargetType="TextBlock">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#CAD7DC" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="{Binding DownloadFileCommand.CommandName}" Command="{Binding DownloadFileCommand}" />
             <MenuItem Header="{Binding ViewFileCommand.CommandName}" Command="{Binding ViewFileCommand}" CommandParameter="server" />
@@ -42,51 +34,6 @@
             <MenuItem Header="{Binding UpdateCommand.CommandName}" Command="{Binding UpdateCommand}" CommandParameter="local" />
             <MenuItem Header="{Binding DeleteFileCommand.CommandName}" Command="{Binding DeleteFileCommand}" CommandParameter="local" />
         </ContextMenu>
-
-        <Style TargetType="TextBox">
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="MinWidth" Value="120" />
-            <Setter Property="MinHeight" Value="00" />
-        </Style>
-
-        <Style TargetType="Label">
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="MinWidth" Value="100" />
-            <Setter Property="MinHeight" Value="20" />
-        </Style>
-
-        <Style x:Key="RoundButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Margin" Value="0 5 5 0" />
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"  
-                                CornerRadius="5" 
-                                Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center" />
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#5D7581" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </Window.Resources>
 
     <Grid>
@@ -110,23 +57,29 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Label Content="Адрес сервера: " />
+                    <Label Content="Адрес сервера: "
+                           Style="{StaticResource LabelStyle}" />
 
                     <TextBox Grid.Column="1"
+                             Style="{StaticResource TextBoxStyle}"
                              Text="{Binding FtpConnectionSettings.ServerAddress}" />
 
                     <Label Grid.Row="1" 
-                           Content="Логин: " />
+                           Content="Логин: "
+                           Style="{StaticResource LabelStyle}" />
 
                     <TextBox Grid.Row="1"
                              Grid.Column="1"
+                             Style="{StaticResource TextBoxStyle}"
                              Text="{Binding FtpConnectionSettings.Username}" />
 
                     <Label Grid.Row="2"  
-                           Content="Пароль: " />
+                           Content="Пароль: "
+                           Style="{StaticResource LabelStyle}" />
 
                     <TextBox Grid.Row="2"
                              Grid.Column="1"
+                             Style="{StaticResource TextBoxStyle}"
                              Text="{Binding FtpConnectionSettings.Password}"/>
 
                     <Button Grid.Row="3"

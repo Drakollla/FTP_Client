@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="Просмотр содержимого файла"
+        Background="#D8E6EF"
         Height="450"
         Width="800">
 
@@ -17,6 +18,7 @@
 
     <Grid>
         <TextBox Text="{Binding TxtFileContent}"
+                 Style="{StaticResource TextBoxStyle}"
                  TextWrapping="Wrap" 
                  AcceptsReturn="True" 
                  VerticalScrollBarVisibility="Auto" 

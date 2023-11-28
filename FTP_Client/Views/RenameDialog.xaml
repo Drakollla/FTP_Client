@@ -8,6 +8,7 @@
         Title="Переименовать"
         Icon="/FTP_Client;component/Resources/ftp.ico"
         WindowStartupLocation="CenterOwner"
+        Background="#D8E6EF"
         Width="350"
         Height="150">
 
@@ -20,6 +21,7 @@
             <TextBlock Text="Введите название:" />
 
             <TextBox Text="{Binding NewFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource TextBoxStyle}"
                      Margin="0 5" />
 
             <StackPanel Orientation="Horizontal" 
@@ -27,11 +29,13 @@
                 <Button Content="Ок"
                         Width="75" 
                         Margin="0 10 10 0"
+                        Style="{StaticResource RoundButtonStyle}"
                         Command="{Binding RenameCommand}" />
 
                 <Button Content="Отмена" 
                         Width="75" 
                         Margin="0 10 0 0"
+                        Style="{StaticResource RoundButtonStyle}"
                         Command="{Binding CancelCommand}" />
 
             </StackPanel>
