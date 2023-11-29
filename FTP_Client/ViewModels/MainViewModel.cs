@@ -17,15 +17,6 @@ namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        private SaveCommand _saveCommand;
-
-        public SaveCommand SaveCommand
-        {
-            get => _saveCommand;
-            set => SetProperty(ref _saveCommand, value);
-        }
-
-
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public MainViewModel()
@@ -306,10 +297,10 @@ namespace FTP_Client.ViewModels
                     int hour = int.Parse(timeParts[0]);
                     int minute = int.Parse(timeParts[1]);
 
-                    DateTime now = DateTime.Now;
+                    var now = DateTime.Now;
                     int year = now.Year;
 
-                    DateTime fileDateTime = new DateTime(year, GetMonthNumber(month), day, hour, minute, 0);
+                    var fileDateTime = new DateTime(year, GetMonthNumber(month), day, hour, minute, 0);
 
                     files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
 
@@ -319,10 +310,15 @@ namespace FTP_Client.ViewModels
                 foreach (var file in files)
                     FilesAndFoldersServer.Add(file);
 
-                AddLogMessage($"Загрузка содержимого на FTP сервере завершена: {response.StatusDescription}", Brushes.Green);
+                AddLogMessage($"Загрузка содержимого в каталоге {CurrentPathServer}  на FTP-сервере завершена: {response.StatusDescription}", Brushes.Green);
 
                 reader.Close();
                 response.Close();
+            }
+            catch (WebException ex)
+            {
+                var response = ex.Response as FtpWebResponse;
+                AddLogMessage($"Ошибка при попытке загрузить содержимое каталоге {CurrentPathServer} на FTP-сервере: " + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
@@ -338,6 +334,13 @@ namespace FTP_Client.ViewModels
         #endregion FtpMethod
 
         #region FtpCommands
+        private SaveCommand _saveCommand;
+        public SaveCommand SaveCommand
+        {
+            get => _saveCommand;
+            set => SetProperty(ref _saveCommand, value);
+        }
+
         private OpenCreateFileDialogCommand _openCreateFileDialogCommand;
         public OpenCreateFileDialogCommand OpenCreateFileDialogCommand
         {

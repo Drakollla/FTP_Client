@@ -15,14 +15,19 @@ namespace FTP_Client.Commands.ContextMenuCommand
             _mainViewModel = mainViewModel;
         }
 
-        public override string CommandName => "Удалить файл";
+        public override string CommandName => "Удалить";
 
         public override void Execute(object? parameter)
         {
             if (parameter as string == "local")
                 DeleteLocal();
             else if (parameter as string == "server")
-                DeleteOnFtpServer();
+            {
+                if (_mainViewModel.SelectedFileItemServer.FileType == "Folder")
+                    DeleteDirectoryOnFtpServer();
+                else
+                    DeleteFileOnFtpServer();
+            }
         }
 
         private void DeleteLocal()
@@ -41,7 +46,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
             _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
         }
 
-        private void DeleteOnFtpServer()
+        private void DeleteFileOnFtpServer()
         {
             try
             {
@@ -49,8 +54,32 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 request.Method = WebRequestMethods.Ftp.DeleteFile;
 
                 using var response = (FtpWebResponse)request.GetResponse();
-                
-                _mainViewModel.AddLogMessage($"Удаление файла завершено: {response.StatusDescription}", Brushes.Green);
+
+                _mainViewModel.AddLogMessage($"Удаление файла {_mainViewModel.SelectedFileItemServer.FileName} завершено: {response.StatusDescription}", Brushes.Green);
+                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                response.Close();
+            }
+            catch (WebException ex)
+            {
+                var response = ex.Response as FtpWebResponse;
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}", Brushes.Red);
+            }
+            catch (Exception ex)
+            {
+                _mainViewModel.AddLogMessage("Ошибка при удалении папки на FTP сервере: " + ex.Message, Brushes.Red);
+            }
+        }
+
+        private void DeleteDirectoryOnFtpServer()
+        {
+            try
+            {
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName);
+                request.Method = WebRequestMethods.Ftp.RemoveDirectory;
+
+                using var response = (FtpWebResponse)request.GetResponse();
+
+                _mainViewModel.AddLogMessage($"Удаление папки {_mainViewModel.SelectedFileItemServer.FileName} завершено: {response.StatusDescription}", Brushes.Green);
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
                 response.Close();
             }

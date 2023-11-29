@@ -28,8 +28,12 @@
                 Command="{Binding SaveCommand}"
                 HorizontalAlignment="Left"
                 Style="{StaticResource RoundButtonStyle}">
+            <Viewbox Width="20" Height="20">
+                <Path Data="M2,0 L8,0 L10,2 L10,10 L0,10 L0,2 Z M3,3 L7,3 L7,9 L3,9 Z" 
+                      Fill="Black" />
+            </Viewbox>
         </Button>
-        
+
         <TextBox Grid.Row="1"
                  Text="{Binding TxtFileContent}"
                  Style="{StaticResource TextBoxStyle}"
