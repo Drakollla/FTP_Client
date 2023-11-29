@@ -17,7 +17,21 @@
     </Window.DataContext>
 
     <Grid>
-        <TextBox Text="{Binding TxtFileContent}"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Button Width="30"
+                Height="30"
+                Margin="5"
+                Command="{Binding SaveCommand}"
+                HorizontalAlignment="Left"
+                Style="{StaticResource RoundButtonStyle}">
+        </Button>
+        
+        <TextBox Grid.Row="1"
+                 Text="{Binding TxtFileContent}"
                  Style="{StaticResource TextBoxStyle}"
                  TextWrapping="Wrap" 
                  AcceptsReturn="True" 

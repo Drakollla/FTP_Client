@@ -1,5 +1,6 @@
 ﻿using FTP_Client.Commands;
 using FTP_Client.Commands.ContextMenuCommand;
+using FTP_Client.Commands.CreateDirectoryCommands;
 using FTP_Client.Commands.NewFolderDialogCommands;
 using FTP_Client.Commands.RenameDialogCo;
 using FTP_Client.Helpers;
@@ -16,6 +17,15 @@ namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
+        private SaveCommand _saveCommand;
+
+        public SaveCommand SaveCommand
+        {
+            get => _saveCommand;
+            set => SetProperty(ref _saveCommand, value);
+        }
+
+
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public MainViewModel()
@@ -34,10 +44,17 @@ namespace FTP_Client.ViewModels
         {
             OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this);
             ViewFileCommand = new ViewFileCommand(this);
+            SaveCommand = new SaveCommand(this);
             DownloadFileCommand = new DownloadFileCommand(this);
             OpenRenameDialogCommand = new OpenRenameDialogCommand(this);
             DeleteFileCommand = new DeleteFileCommand(this);
             UpdateCommand = new UpdateCommand(this);
+
+            OpenCreateDialogCommand = new OpenCreateDialogCommand(this);
+            CreateFolderOnFtpServerCommand = new CreateFolderOnFtpServerCommand(this);
+
+            OpenCreateFileDialogCommand = new OpenCreateFileDialogCommand(this);
+            CreateFileOnFtpServerCommand = new CreateFileOnFtpServerCommand(this);
 
             CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
             RenameCommand = new RenameCommand(this);
@@ -279,7 +296,7 @@ namespace FTP_Client.ViewModels
                     string name = tokens[8];
 
                     bool isFolder = line.StartsWith("d");
-                    string fileType = isFolder ? "Folder" : "File";
+                    string fileType = isFolder ? "Folder" : Path.GetExtension(name);
 
                     var size = long.Parse(tokens[4]);
 
@@ -290,7 +307,7 @@ namespace FTP_Client.ViewModels
                     int minute = int.Parse(timeParts[1]);
 
                     DateTime now = DateTime.Now;
-                    int year = now.Year; // Предполагаем, что текущий год - это год файла
+                    int year = now.Year;
 
                     DateTime fileDateTime = new DateTime(year, GetMonthNumber(month), day, hour, minute, 0);
 
@@ -321,6 +338,34 @@ namespace FTP_Client.ViewModels
         #endregion FtpMethod
 
         #region FtpCommands
+        private OpenCreateFileDialogCommand _openCreateFileDialogCommand;
+        public OpenCreateFileDialogCommand OpenCreateFileDialogCommand
+        {
+            get => _openCreateFileDialogCommand;
+            set => SetProperty(ref _openCreateFileDialogCommand, value);
+        }
+
+        private CreateFileOnFtpServerCommand _createFileOnFtpServerCommand;
+        public CreateFileOnFtpServerCommand CreateFileOnFtpServerCommand
+        {
+            get => _createFileOnFtpServerCommand;
+            set => SetProperty(ref _createFileOnFtpServerCommand, value);
+        }
+
+        private OpenCreateDialogCommand _openCreateDialogCommand;
+        public OpenCreateDialogCommand OpenCreateDialogCommand
+        {
+            get => _openCreateDialogCommand;
+            set => SetProperty(ref _openCreateDialogCommand, value);
+        }
+
+        private CreateFolderOnFtpServerCommand _createFolderOnFtpServerCommand;
+        public CreateFolderOnFtpServerCommand CreateFolderOnFtpServerCommand
+        {
+            get => _createFolderOnFtpServerCommand;
+            set => SetProperty(ref _createFolderOnFtpServerCommand, value);
+        }
+
         private MouseClickCommand _mouseClickCommand;
         public MouseClickCommand MouseClickCommand
         {

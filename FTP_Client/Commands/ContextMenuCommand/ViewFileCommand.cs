@@ -19,7 +19,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
             _mainViewModel = mainViewModel;
         }
 
-        public override string CommandName => "Просмотр";
+        public override string CommandName => "Просмотр/Правка";
 
         public override void Execute(object? parameter)
         {

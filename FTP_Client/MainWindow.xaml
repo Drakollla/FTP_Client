@@ -20,19 +20,36 @@
 
     <Window.Resources>
         <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
+        <converter:FileTypeToBooleanConverter x:Key="FileTypeToBooleanConverter" />
 
         <ContextMenu x:Key="ListViewContextMenu">
-            <MenuItem Header="{Binding DownloadFileCommand.CommandName}" Command="{Binding DownloadFileCommand}" />
-            <MenuItem Header="{Binding ViewFileCommand.CommandName}" Command="{Binding ViewFileCommand}" CommandParameter="server" />
-            <MenuItem Header="{Binding UpdateCommand.CommandName}" Command="{Binding UpdateCommand}" CommandParameter="server" />
-            <MenuItem Header="{Binding OpenRenameDialogCommand.CommandName}" Command="{Binding OpenRenameDialogCommand}" />
-            <MenuItem Header="{Binding DeleteFileCommand.CommandName}" Command="{Binding DeleteFileCommand}" CommandParameter="server" />
+            <MenuItem Header="{Binding DownloadFileCommand.CommandName}" 
+                      Command="{Binding DownloadFileCommand}"
+                      IsEnabled="{Binding SelectedFileItemServer.FileType, Converter={StaticResource FileTypeToBooleanConverter}}" />
+            <MenuItem Header="{Binding OpenRenameDialogCommand.CommandName}"
+                      Command="{Binding OpenRenameDialogCommand}" />
+            <MenuItem Header="{Binding OpenCreateDialogCommand.CommandName}" 
+                      Command="{Binding OpenCreateDialogCommand}" />
+            <MenuItem Header="{Binding OpenCreateFileDialogCommand.CommandName}" 
+                      Command="{Binding OpenCreateFileDialogCommand}" />
+            <MenuItem Header="{Binding UpdateCommand.CommandName}"
+                      Command="{Binding UpdateCommand}" CommandParameter="server" />
+            
+            <MenuItem Header="{Binding ViewFileCommand.CommandName}"
+                      Command="{Binding ViewFileCommand}" />
+            
+            <MenuItem Header="{Binding DeleteFileCommand.CommandName}"
+                      Command="{Binding DeleteFileCommand}" CommandParameter="server"
+                      IsEnabled="{Binding SelectedFileItemServer.FileType, Converter={StaticResource FileTypeToBooleanConverter}}" />
         </ContextMenu>
 
         <ContextMenu x:Key="ListViewContextMenuLocal">
-            <MenuItem Header="{Binding UploadFileCommand.CommandName}" Command="{Binding UploadFileCommand}" />
-            <MenuItem Header="{Binding UpdateCommand.CommandName}" Command="{Binding UpdateCommand}" CommandParameter="local" />
-            <MenuItem Header="{Binding DeleteFileCommand.CommandName}" Command="{Binding DeleteFileCommand}" CommandParameter="local" />
+            <MenuItem Header="{Binding UploadFileCommand.CommandName}" 
+                      Command="{Binding UploadFileCommand}" />
+            <MenuItem Header="{Binding UpdateCommand.CommandName}" 
+                      Command="{Binding UpdateCommand}" CommandParameter="local" />
+            <MenuItem Header="{Binding DeleteFileCommand.CommandName}" 
+                      Command="{Binding DeleteFileCommand}" CommandParameter="local" />
         </ContextMenu>
     </Window.Resources>
 

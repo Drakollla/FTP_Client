@@ -9,5 +9,17 @@
         <Setter Property="FontSize" Value="12" />
         <Setter Property="MinWidth" Value="120" />
         <Setter Property="MinHeight" Value="00" />
+
+        <Style.Triggers>
+            <Trigger Property="Text" Value="">
+                <Setter Property="BorderBrush" Value="Red" />
+            </Trigger>
+            <Trigger Property="Text" Value="{x:Null}">
+                <Setter Property="BorderBrush" Value="Red" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="{x:Null}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 </ResourceDictionary>
