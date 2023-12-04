@@ -17,7 +17,7 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
         public override void Execute(object? parameter)
         {
             var ftpFolder = "/" + _mainViewModel.FolderName;
-            var ftpPath = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + ftpFolder;
+            var ftpPath = _mainViewModel.CurrentPathServer + ftpFolder;
 
             try
             {

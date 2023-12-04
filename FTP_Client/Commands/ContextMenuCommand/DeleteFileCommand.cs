@@ -74,7 +74,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
         {
             try
             {
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName);
+                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemServer.FileName);
                 request.Method = WebRequestMethods.Ftp.RemoveDirectory;
 
                 using var response = (FtpWebResponse)request.GetResponse();

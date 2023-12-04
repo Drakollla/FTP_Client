@@ -16,7 +16,7 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
 
         public override void Execute(object? parameter)
         {
-            var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.NewFileName);
+            var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.CurrentPathServer + _mainViewModel.NewFileName);
             request.Method = WebRequestMethods.Ftp.MakeDirectory;
 
             try

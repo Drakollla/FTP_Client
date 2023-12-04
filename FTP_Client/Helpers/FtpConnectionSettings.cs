@@ -1,18 +1,19 @@
 ﻿using FTP_Client.Models;
+using System;
 using System.Net;
 
 namespace FTP_Client.Helpers
 {
     public class FtpConnectionSettings : ObservableObject
     {
-        private string _serverAddress = "ftp://127.0.0.1";
+        private string _serverAddress = "127.0.0.1"; //"ftp://127.0.0.1";
         public string ServerAddress
         {
             get => _serverAddress;
             set => SetProperty(ref _serverAddress, value);
         }
 
-        private int _port;
+        private int _port = 21;
         public int Port
         {
             get => _port;
@@ -35,8 +36,11 @@ namespace FTP_Client.Helpers
 
         public FtpWebRequest CreateFtpRequest(string stringUriRequest)
         {
-            var request = (FtpWebRequest)WebRequest.Create(stringUriRequest);
+            var uriBuilder = new UriBuilder("ftp", ServerAddress, Port);
+
+            var request = (FtpWebRequest)WebRequest.Create(uriBuilder.ToString() + stringUriRequest);
             request.Credentials = new NetworkCredential(Username, Password);
+
             return request;
         }
     }

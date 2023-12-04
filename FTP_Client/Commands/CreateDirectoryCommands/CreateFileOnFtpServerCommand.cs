@@ -17,7 +17,7 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
 
         public override void Execute(object? parameter)
         {
-            var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.NewFileName);
+            var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.CurrentPathServer + _mainViewModel.NewFileName + _mainViewModel.SelectedExtension);
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
             try
@@ -32,6 +32,8 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 _mainViewModel.AddLogMessage("Файл успешно создан. Статус: " + response.StatusDescription, Brushes.Green);
                 response.Close();
+
+                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
             }
             catch (WebException ex)
             {

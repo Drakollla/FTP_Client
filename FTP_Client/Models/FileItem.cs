@@ -18,8 +18,8 @@ namespace FTP_Client.Models
             set => SetProperty(ref _size, value);
         }
 
-        private DateTime _lastModified;
-        public DateTime LastModified
+        private DateTime? _lastModified;
+        public DateTime? LastModified
         {
             get => _lastModified;
             set => SetProperty(ref _lastModified, value);

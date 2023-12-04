@@ -19,7 +19,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override void Execute(object? parameter)
         {
-            var ftpServerUrl = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemLocal.FileName;
+            var ftpServerUrl = _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemLocal.FileName;
 
             try
             {

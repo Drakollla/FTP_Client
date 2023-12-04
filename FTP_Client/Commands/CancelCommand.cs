@@ -8,7 +8,7 @@ namespace FTP_Client.Commands
     {
         public override void Execute(object? parameter)
         {
-            Window? topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+            var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
             topWindow?.Close();
         }
     }

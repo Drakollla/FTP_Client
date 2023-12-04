@@ -33,13 +33,11 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
                 if (imageExtensions.Contains(fileExtension.ToLower()))
                 {
-                    DownloadImageFromFtp(_mainViewModel.FtpConnectionSettings.ServerAddress,
-                    _mainViewModel.SelectedFileItemServer.FileName);
+                    DownloadImageFromFtp(_mainViewModel.SelectedFileItemServer.FileName);
                 }
                 else if (textExtensions.Contains(fileExtension.ToLower()))
                 {
-                    _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(_mainViewModel.FtpConnectionSettings.ServerAddress,
-                        _mainViewModel.SelectedFileItemServer.FileName);
+                    _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(_mainViewModel.SelectedFileItemServer.FileName);
 
                     _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
                 }
@@ -58,9 +56,9 @@ namespace FTP_Client.Commands.ContextMenuCommand
             if (readFileDialog.ShowDialog() == true) { }
         }
 
-        public string DownloadAndReadTextFileFromFtp(string serverUri, string filePath)
+        public string DownloadAndReadTextFileFromFtp(string filePath)
         {
-            var requestUriString = serverUri + _mainViewModel.CurrentPathServer + filePath;
+            var requestUriString = _mainViewModel.CurrentPathServer + filePath;
 
             try
             {
@@ -87,9 +85,9 @@ namespace FTP_Client.Commands.ContextMenuCommand
             }
         }
 
-        public void DownloadImageFromFtp(string serverUri, string remoteImagePath)
+        public void DownloadImageFromFtp(string remoteImagePath)
         {
-            var requestUriString = serverUri + _mainViewModel.CurrentPathServer + remoteImagePath;
+            var requestUriString = _mainViewModel.CurrentPathServer + remoteImagePath;
 
             try
             {

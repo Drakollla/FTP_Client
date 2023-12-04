@@ -17,6 +17,29 @@ namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
+        private string _selectedExtension;
+        public string SelectedExtension
+        {
+            get { return _selectedExtension; }
+            set
+            {
+                _selectedExtension = value;
+                OnPropertyChanged(nameof(SelectedExtension));
+            }
+        }
+
+        public List<string> AvailableExtensions { get; } = new List<string> { ".txt", ".pdf", ".docx" };
+
+
+
+
+        private MainPaigeCommand _mainPaigeCommand;
+        public MainPaigeCommand MainPaigeCommand
+        {
+            get => _mainPaigeCommand;
+            set => SetProperty(ref _mainPaigeCommand, value);
+        }
+
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public MainViewModel()
@@ -26,7 +49,7 @@ namespace FTP_Client.ViewModels
 
         private void Initialize()
         {
-            CurrentPathServer = "/";
+            //CurrentPathServer = "/";
             InitializingCommands();
             LoadDrives();
         }
@@ -57,6 +80,8 @@ namespace FTP_Client.ViewModels
             ForwardCommand = new ForwardCommand(this);
             MouseClickCommand = new MouseClickCommand(this);
             ConnectFTPServerCommand = new ConnectFTPServerCommand(this);
+            MainPaigeCommand = new MainPaigeCommand(this);
+
             FtpConnectionSettings = new FtpConnectionSettings();
         }
 
@@ -172,8 +197,11 @@ namespace FTP_Client.ViewModels
         #endregion LoaclProperty
 
         #region LocalMethod
-        private void LoadDrives()
+        public void LoadDrives()
         {
+
+            FilesAndFoldersLocal?.Clear();
+
             foreach (var drive in DriveInfo.GetDrives())
             {
                 if (drive.IsReady)
@@ -204,8 +232,9 @@ namespace FTP_Client.ViewModels
                     {
                         FileName = dirInfo.Name,
                         FileType = "Folder",
+                        LastModified = dirInfo.LastWriteTime,
                         Size = 0
-                    });
+                    }) ;
                 }
 
                 foreach (var file in Directory.GetFiles(folderPath))
@@ -259,7 +288,7 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _selectedFileItemServer, value);
         }
 
-        public string GetFilePatnOnFTP => FtpConnectionSettings.ServerAddress + CurrentPathServer + SelectedFileItemServer.FileName;
+        public string GetFilePatnOnFTP => CurrentPathServer + SelectedFileItemServer.FileName;
         #endregion FtpProperty
 
         #region FtpMethod
@@ -270,7 +299,7 @@ namespace FTP_Client.ViewModels
 
             try
             {
-                var request = FtpConnectionSettings.CreateFtpRequest(FtpConnectionSettings.ServerAddress + folderPath);
+                var request = FtpConnectionSettings.CreateFtpRequest(folderPath);
 
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
 

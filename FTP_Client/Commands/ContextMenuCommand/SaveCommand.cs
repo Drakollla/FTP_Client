@@ -1,7 +1,9 @@
 ﻿using FTP_Client.ViewModels;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.ContextMenuCommand
@@ -19,7 +21,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
         {
             string newFileContent = _mainViewModel.TxtFileContent;
 
-            string serverUri = _mainViewModel.FtpConnectionSettings.ServerAddress + _mainViewModel.CurrentPathServer;
+            string serverUri = _mainViewModel.CurrentPathServer;
             string filePath = _mainViewModel.SelectedFileItemServer.FileName;
             UploadTextFileToFtp(serverUri, filePath, newFileContent);
         }
@@ -47,6 +49,11 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 {
                     _mainViewModel.AddLogMessage($"Загрузка файла завершена, status {response.StatusDescription}", Brushes.Green);
                 }
+
+                var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                topWindow?.Close();
+
+                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
             }
             catch (WebException ex)
             {

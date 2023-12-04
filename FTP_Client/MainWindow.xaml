@@ -64,6 +64,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
@@ -78,25 +79,34 @@
                              Style="{StaticResource TextBoxStyle}"
                              Text="{Binding FtpConnectionSettings.ServerAddress}" />
 
-                    <Label Grid.Row="1" 
-                           Content="Логин: "
+                    <Label Content="Порт: "
+                           Grid.Row="1"
                            Style="{StaticResource LabelStyle}" />
 
-                    <TextBox Grid.Row="1"
-                             Grid.Column="1"
+                    <TextBox Grid.Column="1"
+                             Grid.Row="1"
                              Style="{StaticResource TextBoxStyle}"
-                             Text="{Binding FtpConnectionSettings.Username}" />
+                             Text="{Binding FtpConnectionSettings.Port}" />
 
-                    <Label Grid.Row="2"  
-                           Content="Пароль: "
+                    <Label Grid.Row="2" 
+                           Content="Логин: "
                            Style="{StaticResource LabelStyle}" />
 
                     <TextBox Grid.Row="2"
                              Grid.Column="1"
                              Style="{StaticResource TextBoxStyle}"
+                             Text="{Binding FtpConnectionSettings.Username}" />
+
+                    <Label Grid.Row="3"  
+                           Content="Пароль: "
+                           Style="{StaticResource LabelStyle}" />
+
+                    <TextBox Grid.Row="3"
+                             Grid.Column="1"
+                             Style="{StaticResource TextBoxStyle}"
                              Text="{Binding FtpConnectionSettings.Password}"/>
 
-                    <Button Grid.Row="3"
+                    <Button Grid.Row="4"
                             Grid.ColumnSpan="2"
                             MaxWidth="150"
                             MinHeight="30"
@@ -152,6 +162,18 @@
                         </Button.Content>
                     </Button>
 
+                    <Button Width="30"
+                            Command="{Binding MainPaigeCommand}"
+                            CommandParameter="local"
+                            Style="{StaticResource RoundButtonStyle}">
+                        <Viewbox Width="20" Height="20">
+                            <Grid>
+                                <Polygon Points="0,8 10,0 20,8" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
+                                <Rectangle Width="15" Height="12" Margin="0,8,0,0" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
+                            </Grid>
+                        </Viewbox>
+                    </Button>
+
                     <TextBlock Margin="10"
                                VerticalAlignment="Center" 
                                Text="{Binding CurrentPathLocal}" />
@@ -188,12 +210,16 @@
                                             DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
                         </GridView>
                     </ListView.View>
-                    
+
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="#CAD7DC" />
+                                </Trigger>
+
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#5D7581" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -234,7 +260,19 @@
                                   StrokeThickness="1" />
                         </Button.Content>
                     </Button>
-                    
+
+                    <Button Width="30"
+                            Command="{Binding MainPaigeCommand}"
+                            CommandParameter="server"
+                            Style="{StaticResource RoundButtonStyle}">
+                        <Viewbox Width="20" Height="20">
+                            <Grid>
+                                <Polygon Points="0,8 10,0 20,8" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
+                                <Rectangle Width="15" Height="12" Margin="0,8,0,0" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
+                            </Grid>
+                        </Viewbox>
+                    </Button>
+
                     <TextBlock Margin="10"
                                VerticalAlignment="Center" 
                                Text="{Binding CurrentPathServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -279,6 +317,10 @@
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="#CAD7DC" />
+                                </Trigger>
+
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#5D7581" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
