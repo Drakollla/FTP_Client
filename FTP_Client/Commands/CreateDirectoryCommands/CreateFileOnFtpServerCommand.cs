@@ -1,7 +1,9 @@
 ﻿using FTP_Client.ViewModels;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.CreateDirectoryCommands
@@ -34,6 +36,9 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
                 response.Close();
 
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+
+                var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                topWindow?.Close();
             }
             catch (WebException ex)
             {

@@ -6,7 +6,7 @@ namespace FTP_Client.Helpers
 {
     public class FtpConnectionSettings : ObservableObject
     {
-        private string _serverAddress = "127.0.0.1"; //"ftp://127.0.0.1";
+        private string _serverAddress = "127.0.0.1";
         public string ServerAddress
         {
             get => _serverAddress;
@@ -40,6 +40,7 @@ namespace FTP_Client.Helpers
 
             var request = (FtpWebRequest)WebRequest.Create(uriBuilder.ToString() + stringUriRequest);
             request.Credentials = new NetworkCredential(Username, Password);
+
 
             return request;
         }

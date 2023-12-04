@@ -1,6 +1,8 @@
 ﻿using FTP_Client.ViewModels;
 using System;
+using System.Linq;
 using System.Net;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.RenameDialogCo
@@ -28,9 +30,12 @@ namespace FTP_Client.Commands.RenameDialogCo
                 request.RenameTo = _mainViewModel.NewFileName;
 
                 using var response = (FtpWebResponse)request.GetResponse();
+                
                 _mainViewModel.AddLogMessage($"Файл успешно переименован: {response.StatusDescription}", Brushes.Green);
-
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+
+                var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                topWindow?.Close();
             }
             catch (WebException ex)
             {

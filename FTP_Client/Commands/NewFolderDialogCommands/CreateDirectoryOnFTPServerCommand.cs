@@ -1,6 +1,8 @@
 ﻿using FTP_Client.ViewModels;
 using System;
+using System.Linq;
 using System.Net;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.NewFolderDialogCommands
@@ -28,6 +30,9 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
 
                 _mainViewModel.AddLogMessage($"Папка успешно создана на FTP сервере: {response.StatusDescription}", Brushes.Green);
                 _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+
+                var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                topWindow?.Close();
             }
             catch (WebException ex)
             {

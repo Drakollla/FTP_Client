@@ -342,9 +342,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-
             </ScrollViewer>
-
         </Grid>
     </Grid>
 </Window>

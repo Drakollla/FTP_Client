@@ -42,7 +42,7 @@
                  VerticalScrollBarVisibility="Auto" 
                  HorizontalScrollBarVisibility="Auto" />
 
-        <Image Source="{Binding ImageSource, UpdateSourceTrigger=PropertyChanged}" />
+        <!--<Image Source="{Binding ImageSource, UpdateSourceTrigger=PropertyChanged}" />-->
 
     </Grid>
 </Window>

@@ -28,23 +28,16 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
             if (!string.IsNullOrEmpty(fileExtension))
             {
-                string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
                 string[] textExtensions = { ".txt", ".doc", ".docx", ".pdf" };
 
-                if (imageExtensions.Contains(fileExtension.ToLower()))
-                {
-                    DownloadImageFromFtp(_mainViewModel.SelectedFileItemServer.FileName);
-                }
-                else if (textExtensions.Contains(fileExtension.ToLower()))
+                if (textExtensions.Contains(fileExtension.ToLower()))
                 {
                     _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(_mainViewModel.SelectedFileItemServer.FileName);
 
                     _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
                 }
                 else
-                {
                     _mainViewModel.AddLogMessage($"Невозможно просмотреть: {_mainViewModel.SelectedFileItemServer.FileName}", Brushes.Orange);
-                }
             }
 
             var readFileDialog = new ReadFileDialog()
@@ -82,40 +75,6 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 _mainViewModel.AddLogMessage("Ошибка при попытке просмотреть содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
 
                 return string.Empty;
-            }
-        }
-
-        public void DownloadImageFromFtp(string remoteImagePath)
-        {
-            var requestUriString = _mainViewModel.CurrentPathServer + remoteImagePath;
-
-            try
-            {
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
-                request.Method = WebRequestMethods.Ftp.DownloadFile;
-
-                using var response = (FtpWebResponse)request.GetResponse();
-                using var responseStream = response.GetResponseStream();
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = responseStream;
-                image.EndInit();
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _mainViewModel.ImageSource = image;
-                });
-                response.Close();
-            }
-            catch (WebException ex)
-            {
-                var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage("Ошибка при попытке просмотреть содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
-            }
-            catch (Exception ex)
-            {
-                _mainViewModel.AddLogMessage($"Ошибка загрузки изображения: {ex.Message}", Brushes.Red);
             }
         }
     }
