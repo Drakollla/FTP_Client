@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:FTP_Client.ViewModels"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:converter="clr-namespace:FTP_Client.Converters"
+        xmlns:cc="clr-namespace:FTP_Client.Resources.Controls"
         mc:Ignorable="d"
         Title="FTP-клиент"
         WindowStartupLocation="CenterScreen"
@@ -101,10 +102,10 @@
                            Content="Пароль: "
                            Style="{StaticResource LabelStyle}" />
 
-                    <TextBox Grid.Row="3"
-                             Grid.Column="1"
-                             Style="{StaticResource TextBoxStyle}"
-                             Text="{Binding FtpConnectionSettings.Password}"/>
+                    <cc:BindablePasswordBox Grid.Row="3"
+                                            Grid.Column="1"
+                                            Padding="5" 
+                                            Password="{Binding FtpConnectionSettings.Password}" />
 
                     <Button Grid.Row="4"
                             Grid.ColumnSpan="2"
