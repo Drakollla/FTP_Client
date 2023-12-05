@@ -34,7 +34,7 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage("Ошибка при попытке создать папку на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при попытке создать папку на FTP сервере:  {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception e)
             {

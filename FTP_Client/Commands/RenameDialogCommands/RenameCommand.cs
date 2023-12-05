@@ -40,7 +40,7 @@ namespace FTP_Client.Commands.RenameDialogCo
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage("Ошибка при попытке переименовать файла/папки на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при попытке переименовать файла/папки на FTP сервере:  {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {

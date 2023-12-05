@@ -17,29 +17,6 @@ namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        private string _selectedExtension;
-        public string SelectedExtension
-        {
-            get { return _selectedExtension; }
-            set
-            {
-                _selectedExtension = value;
-                OnPropertyChanged(nameof(SelectedExtension));
-            }
-        }
-
-        public List<string> AvailableExtensions { get; } = new List<string> { ".txt", ".pdf", ".docx" };
-
-
-
-
-        private MainPaigeCommand _mainPaigeCommand;
-        public MainPaigeCommand MainPaigeCommand
-        {
-            get => _mainPaigeCommand;
-            set => SetProperty(ref _mainPaigeCommand, value);
-        }
-
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         public MainViewModel()
@@ -49,7 +26,6 @@ namespace FTP_Client.ViewModels
 
         private void Initialize()
         {
-            //CurrentPathServer = "/";
             InitializingCommands();
             LoadDrives();
         }
@@ -83,6 +59,13 @@ namespace FTP_Client.ViewModels
             MainPaigeCommand = new MainPaigeCommand(this);
 
             FtpConnectionSettings = new FtpConnectionSettings();
+        }
+
+        private MainPaigeCommand _mainPaigeCommand;
+        public MainPaigeCommand MainPaigeCommand
+        {
+            get => _mainPaigeCommand;
+            set => SetProperty(ref _mainPaigeCommand, value);
         }
 
         public void AddLogMessage(string mesaage, SolidColorBrush color) =>
@@ -287,6 +270,19 @@ namespace FTP_Client.ViewModels
             get => _selectedFileItemServer;
             set => SetProperty(ref _selectedFileItemServer, value);
         }
+
+        private string _selectedExtension;
+        public string SelectedExtension
+        {
+            get { return _selectedExtension; }
+            set
+            {
+                _selectedExtension = value;
+                OnPropertyChanged(nameof(SelectedExtension));
+            }
+        }
+
+        public List<string> AvailableExtensions { get; } = new List<string> { ".txt", ".pdf", ".docx" };
 
         public string GetFilePatnOnFTP => CurrentPathServer + SelectedFileItemServer.FileName;
         #endregion FtpProperty

@@ -40,9 +40,9 @@ namespace FTP_Client.Commands.ContextMenuCommand
             {
                 var response = ex.Response as FtpWebResponse;
                 if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                    _mainViewModel.AddLogMessage($"Ошибка при попытке загрузить файл на сервер: {response.StatusDescription}", Brushes.Orange);
+                    _mainViewModel.AddLogMessage($"Ошибка при попытке загрузить файл на сервер: {response.StatusDescription}" + ex.Message, Brushes.Orange);
                 else
-                    _mainViewModel.AddLogMessage($"Ошибка при создании папки на FTP сервере: {response.StatusDescription}", Brushes.Red);
+                    _mainViewModel.AddLogMessage($"Ошибка при создании папки на FTP сервере: {response.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {

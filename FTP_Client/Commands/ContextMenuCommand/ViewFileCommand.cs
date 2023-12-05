@@ -66,7 +66,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage("Ошибка при попытке просмотреть содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при попытке просмотреть содержимое файла на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red) ;
 
                 return string.Empty;
             }

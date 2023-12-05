@@ -38,9 +38,9 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
             {
                 var response = ex.Response as FtpWebResponse;
                 if (response?.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                    _mainViewModel.AddLogMessage("Папка уже существует на FTP сервере", Brushes.Orange);
+                    _mainViewModel.AddLogMessage($"Папка уже существует на FTP сервере:  {response?.StatusDescription}", Brushes.Orange);
                 else
-                    _mainViewModel.AddLogMessage("Ошибка при создании папки на FTP сервере: " + ex.Message, Brushes.Red);
+                    _mainViewModel.AddLogMessage($"Ошибка при создании папки на FTP сервере:  {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {

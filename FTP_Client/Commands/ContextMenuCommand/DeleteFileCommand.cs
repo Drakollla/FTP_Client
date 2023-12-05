@@ -62,7 +62,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}", Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
@@ -86,7 +86,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}", Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
