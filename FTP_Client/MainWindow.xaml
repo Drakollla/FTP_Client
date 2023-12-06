@@ -22,6 +22,7 @@
     <Window.Resources>
         <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
         <converter:FileTypeToBooleanConverter x:Key="FileTypeToBooleanConverter" />
+        <converter:DateConverter x:Key="DateConverter" />
 
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="{Binding DownloadFileCommand.CommandName}" 
@@ -58,6 +59,25 @@
         </Grid.ColumnDefinitions>
 
         <Expander ExpandDirection="Left">
+            <Expander.Style>
+                <Style TargetType="Expander">
+                    <Setter Property="IsExpanded" Value="False" />
+                    <Style.Triggers>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard  x:Name="test">
+                                <Storyboard x:Name="closeStoryboard">
+                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetProperty="IsExpanded">
+                                        <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="False" />
+                                    </BooleanAnimationUsingKeyFrames>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <StopStoryboard BeginStoryboardName="test" />
+                        </EventTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Expander.Style>
             <StackPanel>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -119,6 +139,7 @@
 
                 </Grid>
             </StackPanel>
+
         </Expander>
 
         <Grid Grid.Column="1">
@@ -302,7 +323,7 @@
 
                             <GridViewColumn Width="100"
                                             Header="Дата изменения" 
-                                            DisplayMemberBinding="{Binding LastModified}" />
+                                            DisplayMemberBinding="{Binding LastModified, Converter={StaticResource DateConverter}}" />
 
                             <GridViewColumn Width="50"
                                             Header="Тип" 

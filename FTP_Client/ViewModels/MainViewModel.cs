@@ -296,7 +296,6 @@ namespace FTP_Client.ViewModels
             try
             {
                 var request = FtpConnectionSettings.CreateFtpRequest(folderPath);
-
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
 
                 using var response = (FtpWebResponse)request.GetResponse();
@@ -318,16 +317,10 @@ namespace FTP_Client.ViewModels
 
                     string month = tokens[5];
                     int day = int.Parse(tokens[6]);
-                    string[] timeParts = tokens[7].Split(':');
-                    int hour = int.Parse(timeParts[0]);
-                    int minute = int.Parse(timeParts[1]);
 
-                    var now = DateTime.Now;
-                    int year = now.Year;
-
-                    var fileDateTime = new DateTime(year, GetMonthNumber(month), day, hour, minute, 0);
-
+                    var fileDateTime = new DateTime(DateTime.Now.Year, GetMonthNumber(month), day);
                     files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
+
 
                     line = reader.ReadLine();
                 }

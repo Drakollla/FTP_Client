@@ -1,4 +1,5 @@
 ﻿using FTP_Client.ViewModels;
+using System.Threading.Tasks;
 
 namespace FTP_Client.Commands
 {
@@ -14,9 +15,15 @@ namespace FTP_Client.Commands
         public override void Execute(object? parameter)
         {
             if (parameter as string == "local")
+            {
                 _mainViewModel.LoadDrives();
+                _mainViewModel.CurrentPathLocal = string.Empty;
+            }
             else if (parameter as string == "server")
+            {
                 _mainViewModel.LoadFolder("/");
+                _mainViewModel.CurrentPathServer = string.Empty;
+            }
         }
     }
 }
