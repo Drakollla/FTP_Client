@@ -45,6 +45,8 @@
         <ContextMenu x:Key="ListViewContextMenuLocal">
             <MenuItem Header="{Binding UploadFileCommand.CommandName}" 
                       Command="{Binding UploadFileCommand}" />
+            <MenuItem Header="{Binding ViewLocalTxtFile.CommandName}"
+                      Command="{Binding ViewLocalTxtFile}" />
             <MenuItem Header="{Binding UpdateCommand.CommandName}" 
                       Command="{Binding UpdateCommand}" CommandParameter="local" />
             <MenuItem Header="{Binding DeleteFileCommand.CommandName}" 

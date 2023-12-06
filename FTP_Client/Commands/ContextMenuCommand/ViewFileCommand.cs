@@ -28,7 +28,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
             if (!string.IsNullOrEmpty(fileExtension))
             {
-                string[] textExtensions = { ".txt", ".doc", ".docx", ".pdf" };
+                string[] textExtensions = { ".txt" };
 
                 if (textExtensions.Contains(fileExtension.ToLower()))
                 {

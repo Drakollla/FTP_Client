@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -51,6 +52,7 @@ namespace FTP_Client.ViewModels
             CancelCommand = new CancelCommand();
 
             UploadFileCommand = new UploadFileCommand(this);
+            ViewLocalTxtFile = new ViewLocalTxtFile(this);
 
             BackCommand = new BackCommand(this);
             ForwardCommand = new ForwardCommand(this);
@@ -59,6 +61,13 @@ namespace FTP_Client.ViewModels
             MainPaigeCommand = new MainPaigeCommand(this);
 
             FtpConnectionSettings = new FtpConnectionSettings();
+        }
+
+        private ViewLocalTxtFile _viewLocalTxt;
+        public ViewLocalTxtFile ViewLocalTxtFile
+        {
+            get => _viewLocalTxt;
+            set => SetProperty(ref _viewLocalTxt, value);
         }
 
         private MainPaigeCommand _mainPaigeCommand;
