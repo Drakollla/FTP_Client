@@ -355,21 +355,19 @@
                 </ListView>
             </Grid>
 
-            <ScrollViewer Grid.Row="1"
-                          Grid.ColumnSpan="2"
-                          Margin="10" 
-                          CanContentScroll="True">
-                <ListBox MaxHeight="100"
-                         ItemsSource="{Binding LogMessages}"
-                         SelectedItem="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Text}"
+            <ListBox Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     Margin="10" 
+                     MaxHeight="100"
+                     ItemsSource="{Binding LogMessages}"
+                     SelectedItem="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Text}"
                                        Foreground="{Binding MessageColor}" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </ScrollViewer>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
     </Grid>
 </Window>
