@@ -359,12 +359,13 @@
                      Grid.ColumnSpan="2"
                      Margin="10" 
                      MaxHeight="100"
+                     MinHeight="50"
                      ItemsSource="{Binding LogMessages}"
                      SelectedItem="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Text}"
-                                       Foreground="{Binding MessageColor}" />
+                                   Foreground="{Binding MessageColor}" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
