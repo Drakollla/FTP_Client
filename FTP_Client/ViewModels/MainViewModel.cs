@@ -241,6 +241,7 @@ namespace FTP_Client.ViewModels
                     {
                         FileName = fileInfo.Name,
                         FileType = fileInfo.Extension,
+                        LastModified = fileInfo.LastWriteTime,
                         Size = fileInfo.Length
                     });
                 }

@@ -361,7 +361,7 @@
                           CanContentScroll="True">
                 <ListBox MaxHeight="100"
                          ItemsSource="{Binding LogMessages}"
-                         SelectedValue="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                         SelectedItem="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Text}"
