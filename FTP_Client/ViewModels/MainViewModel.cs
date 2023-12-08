@@ -12,7 +12,6 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace FTP_Client.ViewModels
 {
@@ -21,11 +20,6 @@ namespace FTP_Client.ViewModels
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
 
         private LogMessage _selectedLogMessage;
-        public LogMessage SelectedLogMessage
-        {
-            get => _selectedLogMessage;
-            set => SetProperty(ref _selectedLogMessage, value);
-        }
 
         public MainViewModel()
         {
@@ -84,6 +78,12 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _mainPaigeCommand, value);
         }
 
+        public LogMessage SelectedLogMessage
+        {
+            get => _selectedLogMessage;
+            set => SetProperty(ref _selectedLogMessage, value);
+        }
+
         public void AddLogMessage(string mesaage, SolidColorBrush color)
         {
 
@@ -120,13 +120,6 @@ namespace FTP_Client.ViewModels
         {
             get => _txtFileContent;
             set => SetProperty(ref _txtFileContent, value);
-        }
-
-        private BitmapImage _imageSource;
-        public BitmapImage ImageSource
-        {
-            get => _imageSource;
-            set => SetProperty(ref _imageSource, value);
         }
         #endregion FieldsAndProperty
 
@@ -173,7 +166,6 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _cancelCommand, value);
         }
         #endregion Commands
-
 
         #region LocalFileManager
 
@@ -309,62 +301,6 @@ namespace FTP_Client.ViewModels
         #endregion FtpProperty
 
         #region FtpMethod
-        //public void LoadFolder(string folderPath)
-        //{
-        //    if (FilesAndFoldersServer.Count != 0)
-        //        FilesAndFoldersServer.Clear();
-
-        //    try
-        //    {
-        //        var request = FtpConnectionSettings.CreateFtpRequest(folderPath);
-        //        request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-
-        //        using var response = (FtpWebResponse)request.GetResponse();
-        //        var responseStream = response.GetResponseStream();
-        //        var reader = new StreamReader(responseStream);
-
-        //        var files = new List<FileItem>();
-
-        //        var line = reader.ReadLine();
-        //        while (line != null)
-        //        {
-        //            string[] tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        //            string name = tokens[8];
-
-        //            bool isFolder = line.StartsWith("d");
-        //            string fileType = isFolder ? "Folder" : Path.GetExtension(name);
-
-        //            var size = long.Parse(tokens[4]);
-
-        //            string month = tokens[5];
-        //            int day = int.Parse(tokens[6]);
-
-        //            var fileDateTime = new DateTime(DateTime.Now.Year, GetMonthNumber(month), day);
-        //            files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
-
-
-        //            line = reader.ReadLine();
-        //        }
-
-        //        foreach (var file in files)
-        //            FilesAndFoldersServer.Add(file);
-
-        //        AddLogMessage($"Загрузка содержимого {folderPath}  на FTP-сервере завершена: {response.StatusDescription}", Brushes.Green);
-
-        //        reader.Close();
-        //        response.Close();
-        //    }
-        //    catch (WebException ex)
-        //    {
-        //        var response = ex.Response as FtpWebResponse;
-        //        AddLogMessage($"Ошибка при попытке загрузить содержимое {folderPath} на FTP-сервере: " + ex.Message, Brushes.Red);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        AddLogMessage("Error: " + ex.Message, Brushes.Red);
-        //    }
-        //}
-
         public async Task LoadFolderAsync(string folderPath)
         {
             if (FilesAndFoldersServer.Count != 0)
@@ -415,7 +351,6 @@ namespace FTP_Client.ViewModels
                 AddLogMessage("Error: " + ex.Message, Brushes.Red);
             }
         }
-
 
         static int GetMonthNumber(string month)
         {
