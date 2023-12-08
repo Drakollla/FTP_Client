@@ -2,6 +2,8 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.ContextMenuCommand
@@ -17,30 +19,35 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
         public override string CommandName => "Загрузить файл на сеервер";
 
-        public override void Execute(object? parameter)
+        public async override void Execute(object? parameter)
         {
             var ftpServerUrl = _mainViewModel.CurrentPathServer + _mainViewModel.SelectedFileItemLocal.FileName;
 
             try
             {
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(ftpServerUrl);
-                request.Method = WebRequestMethods.Ftp.UploadFile;
+                await Task.Run(async () =>
+               {
+                   var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(ftpServerUrl);
+                   request.Method = WebRequestMethods.Ftp.UploadFile;
 
-                using (var fileStream = File.OpenRead(_mainViewModel.GetFilePath))
-                using (var ftpStream = request.GetRequestStream())
-                {
-                    fileStream.CopyTo(ftpStream);
-                }
+                   using (var fileStream = File.OpenRead(_mainViewModel.GetFilePath))
+                   using (var ftpStream = request.GetRequestStream())
+                   {
+                       fileStream.CopyTo(ftpStream);
+                   }
 
-                _mainViewModel.AddLogMessage("Файл успешно загружен на FTP-сервер.", Brushes.Green);
-
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                   await Application.Current.Dispatcher.InvokeAsync(async () =>
+                   {
+                       _mainViewModel.AddLogMessage($"Файл {_mainViewModel.SelectedFileItemLocal.FileName} успешно загружен на FTP-сервер.", Brushes.Green);
+                       await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
+                   });
+               });
             }
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
                 if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                    _mainViewModel.AddLogMessage($"Ошибка при попытке загрузить файл на сервер: {response.StatusDescription}" + ex.Message, Brushes.Orange);
+                    _mainViewModel.AddLogMessage($"Ошибка при попытке загрузить файл {_mainViewModel.SelectedFileItemLocal.FileName} на сервер: {response.StatusDescription}" + ex.Message, Brushes.Orange);
                 else
                     _mainViewModel.AddLogMessage($"Ошибка при создании папки на FTP сервере: {response.StatusDescription}" + ex.Message, Brushes.Red);
             }

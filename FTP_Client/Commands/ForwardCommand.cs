@@ -11,7 +11,7 @@ namespace FTP_Client.Commands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object? parameter)
+        public async override void Execute(object? parameter)
         {
             if (parameter as string == "local")
             {
@@ -27,7 +27,7 @@ namespace FTP_Client.Commands
                 if (_mainViewModel.ForwardStackServer.Count > 0)
                 {
                     var nextFolderPath = _mainViewModel.ForwardStackServer.Pop();
-                    _mainViewModel.LoadFolder(nextFolderPath);
+                    await _mainViewModel.LoadFolderAsync(nextFolderPath);
                     _mainViewModel.CurrentPathServer = nextFolderPath;
 
                     _mainViewModel.BackStackServer.Push(_mainViewModel.CurrentPathServer);

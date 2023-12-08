@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -17,52 +18,59 @@ namespace FTP_Client.Commands.ContextMenuCommand
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object? parameter)
+        public override async void Execute(object? parameter)
         {
             string newFileContent = _mainViewModel.TxtFileContent;
 
             string serverUri = _mainViewModel.CurrentPathServer;
             string filePath = _mainViewModel.SelectedFileItemServer.FileName;
-            UploadTextFileToFtp(serverUri, filePath, newFileContent);
+
+            await UploadTextFileToFtpAsync(serverUri, filePath, newFileContent);
         }
 
-        public void UploadTextFileToFtp(string serverUri, string filePath, string fileContent)
+        public async Task UploadTextFileToFtpAsync(string serverUri, string filePath, string fileContent)
         {
             try
             {
                 var requestUriString = serverUri + filePath;
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
-                request.Method = WebRequestMethods.Ftp.UploadFile;
-                request.ContentLength = fileContent.Length;
-                request.UseBinary = true;
-                request.UsePassive = true;
-                request.KeepAlive = false;
 
-                byte[] fileData = System.Text.Encoding.UTF8.GetBytes(fileContent);
-
-                using (Stream requestStream = request.GetRequestStream())
+                await Task.Run(async () =>
                 {
-                    requestStream.Write(fileData, 0, fileData.Length);
-                }
+                    var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(requestUriString);
+                    request.Method = WebRequestMethods.Ftp.UploadFile;
+                    request.ContentLength = fileContent.Length;
+                    request.UseBinary = true;
+                    request.UsePassive = true;
+                    request.KeepAlive = false;
 
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
-                {
-                    _mainViewModel.AddLogMessage($"Загрузка файла завершена, status {response.StatusDescription}", Brushes.Green);
-                }
+                    byte[] fileData = System.Text.Encoding.UTF8.GetBytes(fileContent);
+
+                    using (var requestStream = request.GetRequestStream())
+                    {
+                        requestStream.Write(fileData, 0, fileData.Length);
+                    }
+
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                        _mainViewModel.AddLogMessage($"Файла {filePath} сохранён: status {response.StatusDescription}", Brushes.Green);
+                    });
+
+                });
 
                 var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
                 topWindow?.Close();
 
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
             }
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage($"Ошибка при попытке изменить содержимое файла на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при попытке изменить содержимое файла {filePath} на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
-                _mainViewModel.AddLogMessage("Ошибка при попытке изменить содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при попытке изменить содержимое файла {filePath} на FTP сервере: " + ex.Message, Brushes.Red) ;
             }
         }
     }

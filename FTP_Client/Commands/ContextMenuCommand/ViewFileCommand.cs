@@ -4,9 +4,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace FTP_Client.Commands.ContextMenuCommand
 {
@@ -32,7 +32,10 @@ namespace FTP_Client.Commands.ContextMenuCommand
 
                 if (textExtensions.Contains(fileExtension.ToLower()))
                 {
-                    _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(_mainViewModel.SelectedFileItemServer.FileName);
+                    Task.Run(async () =>
+                   {
+                       _mainViewModel.TxtFileContent = DownloadAndReadTextFileFromFtp(_mainViewModel.SelectedFileItemServer.FileName);
+                   });
 
                     _mainViewModel.NewFileName = _mainViewModel.SelectedFileItemServer.FileName;
                 }
@@ -66,13 +69,13 @@ namespace FTP_Client.Commands.ContextMenuCommand
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage($"Ошибка при попытке просмотреть содержимое файла на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red) ;
+                _mainViewModel.AddLogMessage($"Ошибка при попытке просмотреть содержимое файла {_mainViewModel.SelectedFileItemServer.FileName} на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
 
                 return string.Empty;
             }
             catch (Exception ex)
             {
-                _mainViewModel.AddLogMessage("Ошибка при попытке просмотреть содержимое файла на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при попытке просмотреть содержимое файла {_mainViewModel.SelectedFileItemServer.FileName} на FTP сервере: " + ex.Message, Brushes.Red);
 
                 return string.Empty;
             }

@@ -23,6 +23,7 @@
         <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
         <converter:FileTypeToBooleanConverter x:Key="FileTypeToBooleanConverter" />
         <converter:DateConverter x:Key="DateConverter" />
+        <converter:IsTxtFileConverter x:Key="IsTxtFileConverter" />
 
         <ContextMenu x:Key="ListViewContextMenu">
             <MenuItem Header="{Binding DownloadFileCommand.CommandName}" 
@@ -37,7 +38,8 @@
             <MenuItem Header="{Binding UpdateCommand.CommandName}"
                       Command="{Binding UpdateCommand}" CommandParameter="server" />
             <MenuItem Header="{Binding ViewFileCommand.CommandName}"
-                      Command="{Binding ViewFileCommand}" />
+                      Command="{Binding ViewFileCommand}" 
+                      IsEnabled="{Binding SelectedFileItemServer.FileType, Converter={StaticResource IsTxtFileConverter}}"/>
             <MenuItem Header="{Binding DeleteFileCommand.CommandName}"
                       Command="{Binding DeleteFileCommand}" CommandParameter="server" />
         </ContextMenu>
@@ -358,7 +360,8 @@
                           Margin="10" 
                           CanContentScroll="True">
                 <ListBox MaxHeight="100"
-                         ItemsSource="{Binding LogMessages}">
+                         ItemsSource="{Binding LogMessages}"
+                         SelectedValue="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Text}"

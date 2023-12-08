@@ -12,7 +12,7 @@ namespace FTP_Client.Commands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object? parameter)
+        public async override void Execute(object? parameter)
         {
             if (parameter as string == "local")
             {
@@ -21,7 +21,7 @@ namespace FTP_Client.Commands
             }
             else if (parameter as string == "server")
             {
-                _mainViewModel.LoadFolder("/");
+                await _mainViewModel.LoadFolderAsync("/");
                 _mainViewModel.CurrentPathServer = string.Empty;
             }
         }

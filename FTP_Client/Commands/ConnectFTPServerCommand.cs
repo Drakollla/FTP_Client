@@ -1,5 +1,4 @@
 ﻿using FTP_Client.ViewModels;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands
@@ -13,10 +12,11 @@ namespace FTP_Client.Commands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object? parameter)
+        public async override void Execute(object? parameter)
         {
             _mainViewModel.AddLogMessage("Подключение к FTP серверу...", Brushes.Black);
-            _mainViewModel.LoadFolder(string.Empty);
+            await _mainViewModel.LoadFolderAsync(string.Empty);
+            _mainViewModel.CurrentPathServer = string.Empty;
         }
     }
 }

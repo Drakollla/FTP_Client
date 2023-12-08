@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
-using System.Windows.Documents;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -19,6 +19,13 @@ namespace FTP_Client.ViewModels
     public class MainViewModel : ObservableObject
     {
         public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
+
+        private LogMessage _selectedLogMessage;
+        public LogMessage SelectedLogMessage
+        {
+            get => _selectedLogMessage;
+            set => SetProperty(ref _selectedLogMessage, value);
+        }
 
         public MainViewModel()
         {
@@ -77,8 +84,13 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _mainPaigeCommand, value);
         }
 
-        public void AddLogMessage(string mesaage, SolidColorBrush color) =>
-            LogMessages.Add(new LogMessage { Text = mesaage, MessageColor = color });
+        public void AddLogMessage(string mesaage, SolidColorBrush color)
+        {
+
+            var logMessage = new LogMessage() { Text = mesaage, MessageColor = color };
+            LogMessages.Add(logMessage);
+            SelectedLogMessage = logMessage;
+        }
 
         #region FieldsAndProperty
 
@@ -226,7 +238,7 @@ namespace FTP_Client.ViewModels
                         FileType = "Folder",
                         LastModified = dirInfo.LastWriteTime,
                         Size = 0
-                    }) ;
+                    });
                 }
 
                 foreach (var file in Directory.GetFiles(folderPath))
@@ -297,7 +309,63 @@ namespace FTP_Client.ViewModels
         #endregion FtpProperty
 
         #region FtpMethod
-        public void LoadFolder(string folderPath)
+        //public void LoadFolder(string folderPath)
+        //{
+        //    if (FilesAndFoldersServer.Count != 0)
+        //        FilesAndFoldersServer.Clear();
+
+        //    try
+        //    {
+        //        var request = FtpConnectionSettings.CreateFtpRequest(folderPath);
+        //        request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
+
+        //        using var response = (FtpWebResponse)request.GetResponse();
+        //        var responseStream = response.GetResponseStream();
+        //        var reader = new StreamReader(responseStream);
+
+        //        var files = new List<FileItem>();
+
+        //        var line = reader.ReadLine();
+        //        while (line != null)
+        //        {
+        //            string[] tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        //            string name = tokens[8];
+
+        //            bool isFolder = line.StartsWith("d");
+        //            string fileType = isFolder ? "Folder" : Path.GetExtension(name);
+
+        //            var size = long.Parse(tokens[4]);
+
+        //            string month = tokens[5];
+        //            int day = int.Parse(tokens[6]);
+
+        //            var fileDateTime = new DateTime(DateTime.Now.Year, GetMonthNumber(month), day);
+        //            files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
+
+
+        //            line = reader.ReadLine();
+        //        }
+
+        //        foreach (var file in files)
+        //            FilesAndFoldersServer.Add(file);
+
+        //        AddLogMessage($"Загрузка содержимого {folderPath}  на FTP-сервере завершена: {response.StatusDescription}", Brushes.Green);
+
+        //        reader.Close();
+        //        response.Close();
+        //    }
+        //    catch (WebException ex)
+        //    {
+        //        var response = ex.Response as FtpWebResponse;
+        //        AddLogMessage($"Ошибка при попытке загрузить содержимое {folderPath} на FTP-сервере: " + ex.Message, Brushes.Red);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        AddLogMessage("Error: " + ex.Message, Brushes.Red);
+        //    }
+        //}
+
+        public async Task LoadFolderAsync(string folderPath)
         {
             if (FilesAndFoldersServer.Count != 0)
                 FilesAndFoldersServer.Clear();
@@ -307,51 +375,47 @@ namespace FTP_Client.ViewModels
                 var request = FtpConnectionSettings.CreateFtpRequest(folderPath);
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
 
-                using var response = (FtpWebResponse)request.GetResponse();
-                var responseStream = response.GetResponseStream();
-                var reader = new StreamReader(responseStream);
-
-                var files = new List<FileItem>();
-
-                var line = reader.ReadLine();
-                while (line != null)
+                using (var response = (FtpWebResponse)await request.GetResponseAsync())
+                using (var responseStream = response.GetResponseStream())
+                using (var reader = new StreamReader(responseStream))
                 {
-                    string[] tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    string name = tokens[8];
+                    var files = new List<FileItem>();
 
-                    bool isFolder = line.StartsWith("d");
-                    string fileType = isFolder ? "Folder" : Path.GetExtension(name);
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        string[] tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        string name = tokens[8];
 
-                    var size = long.Parse(tokens[4]);
+                        bool isFolder = line.StartsWith("d");
+                        string fileType = isFolder ? "Folder" : Path.GetExtension(name);
 
-                    string month = tokens[5];
-                    int day = int.Parse(tokens[6]);
+                        var size = long.Parse(tokens[4]);
 
-                    var fileDateTime = new DateTime(DateTime.Now.Year, GetMonthNumber(month), day);
-                    files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
+                        string month = tokens[5];
+                        int day = int.Parse(tokens[6]);
 
+                        var fileDateTime = new DateTime(DateTime.Now.Year, GetMonthNumber(month), day);
+                        files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
+                    }
 
-                    line = reader.ReadLine();
+                    foreach (var file in files)
+                        FilesAndFoldersServer.Add(file);
+
+                    AddLogMessage($"Загрузка содержимого {folderPath} на FTP-сервере завершена: {response.StatusDescription}", Brushes.Green);
                 }
-
-                foreach (var file in files)
-                    FilesAndFoldersServer.Add(file);
-
-                AddLogMessage($"Загрузка содержимого в каталоге {CurrentPathServer}  на FTP-сервере завершена: {response.StatusDescription}", Brushes.Green);
-
-                reader.Close();
-                response.Close();
             }
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                AddLogMessage($"Ошибка при попытке загрузить содержимое каталоге {CurrentPathServer} на FTP-сервере: " + ex.Message, Brushes.Red);
+                AddLogMessage($"Ошибка при попытке загрузить содержимое {folderPath} на FTP-сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
                 AddLogMessage("Error: " + ex.Message, Brushes.Red);
             }
         }
+
 
         static int GetMonthNumber(string month)
         {

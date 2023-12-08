@@ -21,7 +21,7 @@ namespace FTP_Client.Commands.RenameDialogCo
             RenameOnFtpServer();
         }
 
-        private void RenameOnFtpServer()
+        private async void RenameOnFtpServer()
         {
             try
             {
@@ -32,7 +32,7 @@ namespace FTP_Client.Commands.RenameDialogCo
                 using var response = (FtpWebResponse)request.GetResponse();
                 
                 _mainViewModel.AddLogMessage($"Файл успешно переименован: {response.StatusDescription}", Brushes.Green);
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
 
                 var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
                 topWindow?.Close();

@@ -17,7 +17,7 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object? parameter)
+        public override async void Execute(object? parameter)
         {
             var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.CurrentPathServer + _mainViewModel.NewFileName + _mainViewModel.SelectedExtension);
             request.Method = WebRequestMethods.Ftp.UploadFile;
@@ -35,7 +35,7 @@ namespace FTP_Client.Commands.CreateDirectoryCommands
                 _mainViewModel.AddLogMessage("Файл успешно создан. Статус: " + response.StatusDescription, Brushes.Green);
                 response.Close();
 
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
 
                 var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
                 topWindow?.Close();

@@ -2,6 +2,8 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.ContextMenuCommand
@@ -46,31 +48,36 @@ namespace FTP_Client.Commands.ContextMenuCommand
             _mainViewModel.NavigateToFolder(_mainViewModel.CurrentPathLocal);
         }
 
-        private void DeleteFileOnFtpServer()
+        private async void DeleteFileOnFtpServer()
         {
             try
             {
-                var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.GetFilePatnOnFTP);
-                request.Method = WebRequestMethods.Ftp.DeleteFile;
+                await Task.Run(async () =>
+                {
+                    var request = _mainViewModel.FtpConnectionSettings.CreateFtpRequest(_mainViewModel.GetFilePatnOnFTP);
+                    request.Method = WebRequestMethods.Ftp.DeleteFile;
 
-                using var response = (FtpWebResponse)request.GetResponse();
+                    using var response = (FtpWebResponse)request.GetResponse();
 
-                _mainViewModel.AddLogMessage($"Удаление файла {_mainViewModel.SelectedFileItemServer.FileName} завершено: {response.StatusDescription}", Brushes.Green);
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
-                response.Close();
+                    await Application.Current.Dispatcher.InvokeAsync(async() =>
+                    {
+                        _mainViewModel.AddLogMessage($"Удаление файла {_mainViewModel.SelectedFileItemServer.FileName} завершено: {response.StatusDescription}", Brushes.Green);
+                        await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
+                    });
+                });
             }
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки {_mainViewModel.SelectedFileItemServer.FileName} на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
-                _mainViewModel.AddLogMessage("Ошибка при удалении папки на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки {_mainViewModel.SelectedFileItemServer.FileName} на FTP сервере: " + ex.Message, Brushes.Red);
             }
         }
 
-        private void DeleteDirectoryOnFtpServer()
+        private async void DeleteDirectoryOnFtpServer()
         {
             try
             {
@@ -80,17 +87,17 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 using var response = (FtpWebResponse)request.GetResponse();
 
                 _mainViewModel.AddLogMessage($"Удаление папки {_mainViewModel.SelectedFileItemServer.FileName} завершено: {response.StatusDescription}", Brushes.Green);
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
                 response.Close();
             }
             catch (WebException ex)
             {
                 var response = ex.Response as FtpWebResponse;
-                _mainViewModel.AddLogMessage($"Ошибка при удалении папки на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки {_mainViewModel.SelectedFileItemServer.FileName} на FTP сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
             }
             catch (Exception ex)
             {
-                _mainViewModel.AddLogMessage("Ошибка при удалении папки на FTP сервере: " + ex.Message, Brushes.Red);
+                _mainViewModel.AddLogMessage($"Ошибка при удалении папки {_mainViewModel.SelectedFileItemServer.FileName}  на FTP сервере: " + ex.Message, Brushes.Red);
             }
         }
     }

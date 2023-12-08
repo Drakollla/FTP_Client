@@ -16,7 +16,7 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
             _mainViewModel = mainViewModel;
         }
 
-        public override void Execute(object? parameter)
+        public async override void Execute(object? parameter)
         {
             var ftpFolder = "/" + _mainViewModel.FolderName;
             var ftpPath = _mainViewModel.CurrentPathServer + ftpFolder;
@@ -29,7 +29,7 @@ namespace FTP_Client.Commands.NewFolderDialogCommands
                 response.Close();
 
                 _mainViewModel.AddLogMessage($"Папка успешно создана на FTP сервере: {response.StatusDescription}", Brushes.Green);
-                _mainViewModel.LoadFolder(_mainViewModel.CurrentPathServer);
+                await _mainViewModel.LoadFolderAsync(_mainViewModel.CurrentPathServer);
 
                 var topWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
                 topWindow?.Close();

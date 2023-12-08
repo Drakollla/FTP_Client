@@ -3,9 +3,7 @@ using FTP_Client.Views;
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace FTP_Client.Commands.ContextMenuCommand
@@ -32,9 +30,7 @@ namespace FTP_Client.Commands.ContextMenuCommand
                 try
                 {
                     if (textExtensions.Contains(fileExtension.ToLower()))
-                    {
                         _mainViewModel.TxtFileContent = File.ReadAllText(_mainViewModel.GetFilePath);
-                    }
                 }
                 catch (Exception ex)
                 {
