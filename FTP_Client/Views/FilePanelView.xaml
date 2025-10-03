@@ -6,7 +6,8 @@
              xmlns:converter="clr-namespace:FTP_Client.Converters"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             Foreground="{StaticResource TextBrush}">
 
     <UserControl.Resources>
         <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
@@ -19,96 +20,82 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Margin="10" 
+        <StackPanel Margin="10,10,10,0" 
                     Orientation="Horizontal">
+
             <Button Command="{Binding GoBackCommand}" 
-                    Style="{StaticResource RoundButtonStyle}">
-
-                <Button.Content>
-                    <Path Data="M4,0 L0,4 L4,8" 
-                          Stroke="Black" 
-                          StrokeThickness="1" />
-                </Button.Content>
+                    Style="{StaticResource IconButton}">
+                <Path Data="M4,0 L0,4 L4,8" 
+                      Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" 
+                      StrokeThickness="1.5" />
             </Button>
 
-            <Button Command="{Binding GoForwardCommand}"
-                    Style="{StaticResource RoundButtonStyle}">
-                
-                <Button.Content>
-                    <Path Data="M0,0 L4,4 L0,8" 
-                          Stroke="Black" 
-                          StrokeThickness="1" />
-                </Button.Content>
+            <Button Command="{Binding GoForwardCommand}" 
+                    Style="{StaticResource IconButton}">
+                <Path Data="M0,0 L4,4 L0,8" 
+                      Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" 
+                      StrokeThickness="1.5" />
             </Button>
 
-            <Button Command="{Binding GoHomeCommand}"
-                    Style="{StaticResource RoundButtonStyle}">
-                
-                <Viewbox Width="20" 
-                         Height="20">
-                    <Grid>
-                        <Polygon Points="0,8 10,0 20,8" 
-                                 Stroke="Black" 
-                                 StrokeThickness="1" 
-                                 Fill="Transparent" />
-                        <Rectangle Width="15" 
-                                   Height="12" 
-                                   Margin="0,8,0,0" 
-                                   Stroke="Black" 
-                                   StrokeThickness="1" 
-                                   Fill="Transparent" />
-                    </Grid>
-                </Viewbox>
+            <Button Command="{Binding GoHomeCommand}" 
+                    Style="{StaticResource IconButton}">
+                <Path Data="M 2 8 L 8 2 L 14 8 M 4 7 L 4 14 L 12 14 L 12 7"
+                      Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      StrokeThickness="1.2"
+                      Width="16" 
+                      Height="16" 
+                      Stretch="Uniform"/>
             </Button>
 
-            <TextBlock Margin="10" 
-                       VerticalAlignment="Center" 
-                       Text="{Binding CurrentPath}" />
+            <Border VerticalAlignment="Center"
+                    Margin="10,0"
+                    Background="{StaticResource PanelBackgroundBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    MinWidth="200"
+                    Padding="8,4">
+
+                <TextBlock Text="{Binding CurrentPath}"
+                           VerticalAlignment="Center" />
+            </Border>
+
         </StackPanel>
 
-
-        <ListView Grid.Row="1" Margin="10" 
-                  ItemsSource="{Binding FilesAndFolders}" 
+        <DataGrid Grid.Row="1" Margin="10"
+                  ItemsSource="{Binding FilesAndFolders}"
                   SelectedItem="{Binding SelectedFileItem}"
-                  ContextMenu="{Binding ContextMenu}">
+                  Style="{StaticResource BaseDataGrid}"
+                  AutoGenerateColumns="False"
+                  CanUserSortColumns="True"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow">
 
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
                     <i:InvokeCommandAction Command="{Binding ItemDoubleClickCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="100"
-                              Header="Наименование" 
-                              DisplayMemberBinding="{Binding FileName}" />
 
-                    <GridViewColumn Width="100"
-                              Header="Дата изменения" 
-                              DisplayMemberBinding="{Binding LastModified}" />
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Наименование" 
+                                    Binding="{Binding FileName}" 
+                                    MinWidth="200" />
 
-                    <GridViewColumn Width="50"
-                              Header="Тип" 
-                              DisplayMemberBinding="{Binding FileType}" />
+                <DataGridTextColumn Header="Дата изменения" 
+                                    Binding="{Binding LastModified, Converter={StaticResource DateConverter}}"
+                                    Width="Auto" />
 
-                    <GridViewColumn Header="Размер" 
-                              DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
-                </GridView>
-            </ListView.View>
+                <DataGridTextColumn Header="Тип" 
+                                    Binding="{Binding FileType}" 
+                                    MinWidth="50" />
 
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#CAD7DC" />
-                        </Trigger>
-
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#5D7581" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
+                <DataGridTextColumn Header="Размер" 
+                                    Binding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" 
+                                    MinWidth="50" />
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
+
 </UserControl>

@@ -14,7 +14,7 @@ namespace FTP_Client.Converters
             {
                 return level switch
                 {
-                    LogLevel.Info => Brushes.Black,
+                    LogLevel.Info => Brushes.White,
                     LogLevel.Success => Brushes.Green,
                     LogLevel.Warning => Brushes.Orange,
                     LogLevel.Error => Brushes.Red,
