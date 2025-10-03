@@ -4,6 +4,7 @@
     <Style x:Key="RoundButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="White" />
         <Setter Property="Margin" Value="0 5 5 0" />
+        <Setter Property="MinWidth" Value="30" />
 
         <Setter Property="Template">
             <Setter.Value>
