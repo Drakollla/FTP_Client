@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FTP_Client.Enums;
+using System;
 
 namespace FTP_Client.Models
 {
@@ -25,11 +26,16 @@ namespace FTP_Client.Models
             set => SetProperty(ref _lastModified, value);
         }
 
-        private string _fileType;
-        public string FileType
+        private FileItemType _fileType;
+        public FileItemType FileType
         {
             get => _fileType;
             set => SetProperty(ref _fileType, value);
         }
+
+
+        public string Extension { get; set; }
+
+        public bool IsDirectory => FileType == FileItemType.Folder || FileType == FileItemType.Drive;
     }
 }
