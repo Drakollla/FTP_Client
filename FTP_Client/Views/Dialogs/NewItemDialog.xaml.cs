@@ -12,14 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace FTP_Client.Views
+namespace FTP_Client.Views.Dialogs
 {
     /// <summary>
-    /// Логика взаимодействия для RenameDialog.xaml
+    /// Логика взаимодействия для NewItemDialog.xaml
     /// </summary>
-    public partial class RenameDialog : Window
+    public partial class NewItemDialog : Window
     {
-        public RenameDialog()
+        public NewItemDialog()
         {
             InitializeComponent();
         }

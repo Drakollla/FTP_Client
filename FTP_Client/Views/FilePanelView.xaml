@@ -1,0 +1,114 @@
+﻿<UserControl x:Class="FTP_Client.Views.FilePanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converter="clr-namespace:FTP_Client.Converters"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <converter:FolderSizeConverter x:Key="FolderSizeConverter" />
+        <converter:DateConverter x:Key="DateConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="10" 
+                    Orientation="Horizontal">
+            <Button Command="{Binding GoBackCommand}" 
+                    Style="{StaticResource RoundButtonStyle}">
+
+                <Button.Content>
+                    <Path Data="M4,0 L0,4 L4,8" 
+                          Stroke="Black" 
+                          StrokeThickness="1" />
+                </Button.Content>
+            </Button>
+
+            <Button Command="{Binding GoForwardCommand}"
+                    Style="{StaticResource RoundButtonStyle}">
+                
+                <Button.Content>
+                    <Path Data="M0,0 L4,4 L0,8" 
+                          Stroke="Black" 
+                          StrokeThickness="1" />
+                </Button.Content>
+            </Button>
+
+            <Button Command="{Binding GoHomeCommand}"
+                    Style="{StaticResource RoundButtonStyle}">
+                
+                <Viewbox Width="20" 
+                         Height="20">
+                    <Grid>
+                        <Polygon Points="0,8 10,0 20,8" 
+                                 Stroke="Black" 
+                                 StrokeThickness="1" 
+                                 Fill="Transparent" />
+                        <Rectangle Width="15" 
+                                   Height="12" 
+                                   Margin="0,8,0,0" 
+                                   Stroke="Black" 
+                                   StrokeThickness="1" 
+                                   Fill="Transparent" />
+                    </Grid>
+                </Viewbox>
+            </Button>
+
+            <TextBlock Margin="10" 
+                       VerticalAlignment="Center" 
+                       Text="{Binding CurrentPath}" />
+        </StackPanel>
+
+
+        <ListView Grid.Row="1" Margin="10" 
+                  ItemsSource="{Binding FilesAndFolders}" 
+                  SelectedItem="{Binding SelectedFileItem}"
+                  ContextMenu="{Binding ContextMenu}">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDoubleClick">
+                    <i:InvokeCommandAction Command="{Binding ItemDoubleClickCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="100"
+                              Header="Наименование" 
+                              DisplayMemberBinding="{Binding FileName}" />
+
+                    <GridViewColumn Width="100"
+                              Header="Дата изменения" 
+                              DisplayMemberBinding="{Binding LastModified}" />
+
+                    <GridViewColumn Width="50"
+                              Header="Тип" 
+                              DisplayMemberBinding="{Binding FileType}" />
+
+                    <GridViewColumn Header="Размер" 
+                              DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
+                </GridView>
+            </ListView.View>
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#CAD7DC" />
+                        </Trigger>
+
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#5D7581" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+    </Grid>
+</UserControl>

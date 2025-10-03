@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace FTP_Client.Views
 {
     /// <summary>
-    /// Логика взаимодействия для ReadFileDialog.xaml
+    /// Логика взаимодействия для FilePanelView.xaml
     /// </summary>
-    public partial class ReadFileDialog : Window
+    public partial class FilePanelView : UserControl
     {
-        public ReadFileDialog()
+        public FilePanelView()
         {
             InitializeComponent();
         }
