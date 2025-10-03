@@ -1,451 +1,481 @@
-﻿using FTP_Client.Commands;
-using FTP_Client.Commands.ContextMenuCommand;
-using FTP_Client.Commands.CreateDirectoryCommands;
-using FTP_Client.Commands.NewFolderDialogCommands;
-using FTP_Client.Commands.RenameDialogCo;
+﻿using FTP_Client.Enums;
 using FTP_Client.Helpers;
 using FTP_Client.Models;
+using FTP_Client.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
-using System.Windows.Media;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace FTP_Client.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
-        public ObservableCollection<LogMessage> LogMessages { get; set; } = new();
+        public const string LocalRootPath = "Мой компьютер";
 
-        private LogMessage _selectedLogMessage;
+        #region Сервисы 
+        private readonly ILoggerService _logger = new LoggerService();
+        private readonly ILocalFileService _localFileService = new LocalFileService();
+        private readonly IFtpService _ftpService = new FtpService();
+        private readonly IDialogService _dialogService = new DialogService();
+        #endregion
+
+        #region Свойства
+
+        public FilePanelViewModel LocalPanel { get; }
+        public FilePanelViewModel ServerPanel { get; }
+
+        public FtpConnectionSettings FtpConnectionSettings { get; } = new();
+        public ObservableCollection<LogMessage> LogMessages => _logger.Messages;
+
+        private bool _isRenameDialogVisible;
+        public bool IsRenameDialogVisible
+        {
+            get => _isRenameDialogVisible;
+            set => SetProperty(ref _isRenameDialogVisible, value);
+        }
+
+        private string _newItemName;
+        public string NewItemName
+        {
+            get => _newItemName;
+            set => SetProperty(ref _newItemName, value);
+        }
+
+        #endregion
+
+        #region Команды
+
+        public ICommand ConnectCommand { get; }
+        public ICommand UploadCommand { get; }
+        public ICommand DownloadCommand { get; }
+
+        public ICommand ShowRenameDialogCommand { get; }
+        public ICommand RenameItemCommand { get; }
+        public ICommand CancelDialogCommand { get; }
+
+        #endregion
+
+        #region Конструктор и Инициализация
 
         public MainViewModel()
         {
-            Initialize();
+            LocalPanel = new FilePanelViewModel("Локальный диск");
+            ServerPanel = new FilePanelViewModel("FTP-Сервер");
+
+            LocalPanel.NavigateRequested += NavigateLocalDirectory;
+            ServerPanel.NavigateRequested += async (path) => await NavigateServerDirectoryAsync(path);
+
+            ConnectCommand = new RelayCommand(async _ => await ConnectAsync(), _ => CanConnect());
+            UploadCommand = new RelayCommand(async _ => await UploadAsync(), _ => CanUpload());
+            DownloadCommand = new RelayCommand(async _ => await DownloadAsync(), _ => CanDownload());
+
+            DeleteLocalItemCommand = new RelayCommand(_ => DeleteLocalItem(), _ => CanOperateOnLocalItem());
+            DeleteServerItemCommand = new RelayCommand(async _ => await DeleteServerItemAsync(), _ => CanOperateOnServerItem());
+            RefreshLocalPanelCommand = new RelayCommand(_ => RefreshLocalPanel());
+            RefreshServerPanelCommand = new RelayCommand(async _ => await RefreshServerPanelAsync(), _ => IsConnected);
+
+            CreateLocalDirectoryCommand = new RelayCommand(_ => CreateLocalDirectory());
+            CreateServerDirectoryCommand = new RelayCommand(async _ => await CreateServerDirectoryAsync(), _ => IsConnected);
+            RenameLocalItemCommand = new RelayCommand(_ => RenameLocalItem(), _ => CanOperateOnLocalItem());
+            RenameServerItemCommand = new RelayCommand(async _ => await RenameServerItemAsync(), _ => CanOperateOnServerItem());
+
+
+            LocalPanel.ContextMenu = CreateLocalContextMenu();
+            ServerPanel.ContextMenu = CreateServerContextMenu();
+
+            LoadInitialDrives();
         }
 
-        private void Initialize()
+
+
+        // --- Создание папки на локальном диске ---
+        private void CreateLocalDirectory()
         {
-            InitializingCommands();
-            LoadDrives();
-        }
+            string newFolderName = _dialogService.ShowNewItemDialog("Создать папку", "Новая папка");
+            if (string.IsNullOrWhiteSpace(newFolderName)) return;
 
-        private void InitializingCommands()
-        {
-            OpenNewFolderDialogCommand = new OpenNewFolderDialogCommand(this);
-            ViewFileCommand = new ViewFileCommand(this);
-            SaveCommand = new SaveCommand(this);
-            DownloadFileCommand = new DownloadFileCommand(this);
-            OpenRenameDialogCommand = new OpenRenameDialogCommand(this);
-            DeleteFileCommand = new DeleteFileCommand(this);
-            UpdateCommand = new UpdateCommand(this);
-
-            OpenCreateDialogCommand = new OpenCreateDialogCommand(this);
-            CreateFolderOnFtpServerCommand = new CreateFolderOnFtpServerCommand(this);
-
-            OpenCreateFileDialogCommand = new OpenCreateFileDialogCommand(this);
-            CreateFileOnFtpServerCommand = new CreateFileOnFtpServerCommand(this);
-
-            CreateDirectoryOnFTPServerCommand = new CreateDirectoryOnFTPServerCommand(this);
-            RenameCommand = new RenameCommand(this);
-            CancelCommand = new CancelCommand();
-
-            UploadFileCommand = new UploadFileCommand(this);
-            ViewLocalTxtFile = new ViewLocalTxtFile(this);
-
-            BackCommand = new BackCommand(this);
-            ForwardCommand = new ForwardCommand(this);
-            MouseClickCommand = new MouseClickCommand(this);
-            ConnectFTPServerCommand = new ConnectFTPServerCommand(this);
-            MainPaigeCommand = new MainPaigeCommand(this);
-
-            FtpConnectionSettings = new FtpConnectionSettings();
-        }
-
-        private ViewLocalTxtFile _viewLocalTxt;
-        public ViewLocalTxtFile ViewLocalTxtFile
-        {
-            get => _viewLocalTxt;
-            set => SetProperty(ref _viewLocalTxt, value);
-        }
-
-        private MainPaigeCommand _mainPaigeCommand;
-        public MainPaigeCommand MainPaigeCommand
-        {
-            get => _mainPaigeCommand;
-            set => SetProperty(ref _mainPaigeCommand, value);
-        }
-
-        public LogMessage SelectedLogMessage
-        {
-            get => _selectedLogMessage;
-            set => SetProperty(ref _selectedLogMessage, value);
-        }
-
-        public void AddLogMessage(string mesaage, SolidColorBrush color)
-        {
-
-            var logMessage = new LogMessage() { Text = mesaage, MessageColor = color };
-            LogMessages.Add(logMessage);
-            SelectedLogMessage = logMessage;
-        }
-
-        #region FieldsAndProperty
-
-        private string _folderName;
-        public string FolderName
-        {
-            get => _folderName;
-            set => SetProperty(ref _folderName, value);
-        }
-
-        private FtpConnectionSettings _ftpConnectionSettings = new();
-        public FtpConnectionSettings FtpConnectionSettings
-        {
-            get => _ftpConnectionSettings;
-            set => SetProperty(ref _ftpConnectionSettings, value);
-        }
-
-        private string _newFileName;
-        public string NewFileName
-        {
-            get => _newFileName;
-            set => SetProperty(ref _newFileName, value);
-        }
-
-        private string _txtFileContent;
-        public string TxtFileContent
-        {
-            get => _txtFileContent;
-            set => SetProperty(ref _txtFileContent, value);
-        }
-        #endregion FieldsAndProperty
-
-        #region Commands
-        private BackCommand _backCommand;
-        public BackCommand BackCommand
-        {
-            get => _backCommand;
-            set => SetProperty(ref _backCommand, value);
-        }
-
-        private ForwardCommand _forwardCommand;
-        public ForwardCommand ForwardCommand
-        {
-            get => _forwardCommand;
-            set => SetProperty(ref _forwardCommand, value);
-        }
-
-        private DeleteFileCommand _deleteFileCommand;
-        public DeleteFileCommand DeleteFileCommand
-        {
-            get => _deleteFileCommand;
-            set => SetProperty(ref _deleteFileCommand, value);
-        }
-
-        private UpdateCommand _updateCommand;
-        public UpdateCommand UpdateCommand
-        {
-            get => _updateCommand;
-            set => SetProperty(ref _updateCommand, value);
-        }
-
-        private ViewFileCommand _viewFileCommand;
-        public ViewFileCommand ViewFileCommand
-        {
-            get => _viewFileCommand;
-            set => SetProperty(ref _viewFileCommand, value);
-        }
-
-        private CancelCommand _cancelCommand;
-        public CancelCommand CancelCommand
-        {
-            get => _cancelCommand;
-            set => SetProperty(ref _cancelCommand, value);
-        }
-        #endregion Commands
-
-        #region LocalFileManager
-
-        #region LoaclProperty
-        public Stack<string> BackStackLocal = new();
-        public Stack<string> ForwardStackLocal = new();
-
-        public ObservableCollection<FileItem> FilesAndFoldersLocal { get; set; } = new();
-
-        public string _currentPathLocal;
-        public string CurrentPathLocal
-        {
-            get => _currentPathLocal;
-            set => SetProperty(ref _currentPathLocal, value);
-        }
-
-        private FileItem _selectedFileItemLocal;
-        public FileItem SelectedFileItemLocal
-        {
-            get => _selectedFileItemLocal;
-            set => SetProperty(ref _selectedFileItemLocal, value);
-        }
-
-        public string GetFilePath => CurrentPathLocal + @"\" + SelectedFileItemLocal.FileName;
-        #endregion LoaclProperty
-
-        #region LocalMethod
-        public void LoadDrives()
-        {
-
-            FilesAndFoldersLocal?.Clear();
-
-            foreach (var drive in DriveInfo.GetDrives())
-            {
-                if (drive.IsReady)
-                {
-                    FilesAndFoldersLocal.Add(new FileItem
-                    {
-                        FileName = drive.Name,
-                        FileType = "Drive",
-                        Size = 0
-                    });
-                }
-            }
-        }
-
-        public void NavigateToFolder(string folderPath)
-        {
+            var newPath = Path.Combine(LocalPanel.CurrentPath, newFolderName);
             try
             {
-                CurrentPathLocal = folderPath;
-
-                FilesAndFoldersLocal.Clear();
-
-                foreach (var directory in Directory.GetDirectories(folderPath))
-                {
-                    var dirInfo = new DirectoryInfo(directory);
-
-                    FilesAndFoldersLocal.Add(new FileItem
-                    {
-                        FileName = dirInfo.Name,
-                        FileType = "Folder",
-                        LastModified = dirInfo.LastWriteTime,
-                        Size = 0
-                    });
-                }
-
-                foreach (var file in Directory.GetFiles(folderPath))
-                {
-                    var fileInfo = new FileInfo(file);
-
-                    FilesAndFoldersLocal.Add(new FileItem
-                    {
-                        FileName = fileInfo.Name,
-                        FileType = fileInfo.Extension,
-                        LastModified = fileInfo.LastWriteTime,
-                        Size = fileInfo.Length
-                    });
-                }
+                _localFileService.CreateDirectory(newPath);
+                _logger.Log($"Папка '{newFolderName}' создана.", LogLevel.Success);
+                RefreshLocalPanel();
             }
             catch (Exception ex)
             {
-                AddLogMessage("Error: " + ex.Message, Brushes.Red);
-            }
-        }
-        #endregion LocalMethod
-
-
-        private UploadFileCommand _uploadFileCommand;
-        public UploadFileCommand UploadFileCommand
-        {
-            get => _uploadFileCommand;
-            set => SetProperty(ref _uploadFileCommand, value);
-        }
-
-        #endregion LocalFileManager
-
-
-        #region FtpFileManager
-
-        #region FtpProperty
-        public Stack<string> BackStackServer = new();
-        public Stack<string> ForwardStackServer = new();
-        public ObservableCollection<FileItem> FilesAndFoldersServer { get; set; } = new();
-
-        public string _currentPathServer;
-        public string CurrentPathServer
-        {
-            get => _currentPathServer;
-            set => SetProperty(ref _currentPathServer, value);
-        }
-
-        private FileItem _selectedFileItemServer;
-        public FileItem SelectedFileItemServer
-        {
-            get => _selectedFileItemServer;
-            set => SetProperty(ref _selectedFileItemServer, value);
-        }
-
-        private string _selectedExtension;
-        public string SelectedExtension
-        {
-            get { return _selectedExtension; }
-            set
-            {
-                _selectedExtension = value;
-                OnPropertyChanged(nameof(SelectedExtension));
+                _logger.Log($"Ошибка создания папки: {ex.Message}", LogLevel.Error);
             }
         }
 
-        public List<string> AvailableExtensions { get; } = new List<string> { ".txt", ".pdf", ".docx" };
-
-        public string GetFilePatnOnFTP => CurrentPathServer + SelectedFileItemServer.FileName;
-        #endregion FtpProperty
-
-        #region FtpMethod
-        public async Task LoadFolderAsync(string folderPath)
+        // --- Создание папки на сервере ---
+        private async Task CreateServerDirectoryAsync()
         {
-            if (FilesAndFoldersServer.Count != 0)
-                FilesAndFoldersServer.Clear();
+            string newFolderName = _dialogService.ShowNewItemDialog("Создать папку на сервере", "Новая папка");
+            if (string.IsNullOrWhiteSpace(newFolderName)) return;
 
+            var newPath = Path.Combine(ServerPanel.CurrentPath, newFolderName).Replace('\\', '/');
             try
             {
-                var request = FtpConnectionSettings.CreateFtpRequest(folderPath);
-                request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-
-                using (var response = (FtpWebResponse)await request.GetResponseAsync())
-                using (var responseStream = response.GetResponseStream())
-                using (var reader = new StreamReader(responseStream))
-                {
-                    var files = new List<FileItem>();
-
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        string[] tokens = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        string name = tokens[8];
-
-                        bool isFolder = line.StartsWith("d");
-                        string fileType = isFolder ? "Folder" : Path.GetExtension(name);
-
-                        var size = long.Parse(tokens[4]);
-
-                        string month = tokens[5];
-                        int day = int.Parse(tokens[6]);
-
-                        var fileDateTime = new DateTime(DateTime.Now.Year, GetMonthNumber(month), day);
-                        files.Add(new FileItem { FileName = name, Size = size, LastModified = fileDateTime, FileType = fileType });
-                    }
-
-                    foreach (var file in files)
-                        FilesAndFoldersServer.Add(file);
-
-                    AddLogMessage($"Загрузка содержимого {folderPath} на FTP-сервере завершена: {response.StatusDescription}", Brushes.Green);
-                }
-            }
-            catch (WebException ex)
-            {
-                var response = ex.Response as FtpWebResponse;
-                AddLogMessage($"Ошибка при попытке загрузить содержимое {folderPath} на FTP-сервере: {response?.StatusDescription}" + ex.Message, Brushes.Red);
+                await _ftpService.CreateDirectoryAsync(newPath, FtpConnectionSettings);
+                _logger.Log($"Папка '{newFolderName}' создана на сервере.", LogLevel.Success);
+                await RefreshServerPanelAsync();
             }
             catch (Exception ex)
             {
-                AddLogMessage("Error: " + ex.Message, Brushes.Red);
+                _logger.Log($"Ошибка создания папки: {ex.Message}", LogLevel.Error);
             }
         }
 
-        static int GetMonthNumber(string month)
+        // --- Переименование локального элемента ---
+        private void RenameLocalItem()
         {
-            DateTime dt = DateTime.ParseExact(month, "MMM", System.Globalization.CultureInfo.InvariantCulture);
-            return dt.Month;
-        }
-        #endregion FtpMethod
+            var item = LocalPanel.SelectedFileItem;
+            string newName = _dialogService.ShowNewItemDialog("Переименовать", item.FileName);
+            if (string.IsNullOrWhiteSpace(newName) || newName == item.FileName) return;
 
-        #region FtpCommands
-        private SaveCommand _saveCommand;
-        public SaveCommand SaveCommand
-        {
-            get => _saveCommand;
-            set => SetProperty(ref _saveCommand, value);
-        }
-
-        private OpenCreateFileDialogCommand _openCreateFileDialogCommand;
-        public OpenCreateFileDialogCommand OpenCreateFileDialogCommand
-        {
-            get => _openCreateFileDialogCommand;
-            set => SetProperty(ref _openCreateFileDialogCommand, value);
-        }
-
-        private CreateFileOnFtpServerCommand _createFileOnFtpServerCommand;
-        public CreateFileOnFtpServerCommand CreateFileOnFtpServerCommand
-        {
-            get => _createFileOnFtpServerCommand;
-            set => SetProperty(ref _createFileOnFtpServerCommand, value);
+            var oldPath = Path.Combine(LocalPanel.CurrentPath, item.FileName);
+            var newPath = Path.Combine(LocalPanel.CurrentPath, newName);
+            try
+            {
+                _localFileService.RenameItem(oldPath, newPath);
+                _logger.Log($"'{item.FileName}' переименован в '{newName}'.", LogLevel.Success);
+                RefreshLocalPanel();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка переименования: {ex.Message}", LogLevel.Error);
+            }
         }
 
-        private OpenCreateDialogCommand _openCreateDialogCommand;
-        public OpenCreateDialogCommand OpenCreateDialogCommand
+        // --- Переименование элемента на сервере ---
+        private async Task RenameServerItemAsync()
         {
-            get => _openCreateDialogCommand;
-            set => SetProperty(ref _openCreateDialogCommand, value);
+            var item = ServerPanel.SelectedFileItem;
+            string newName = _dialogService.ShowNewItemDialog("Переименовать на сервере", item.FileName);
+            if (string.IsNullOrWhiteSpace(newName) || newName == item.FileName) return;
+
+            var oldPath = Path.Combine(ServerPanel.CurrentPath, item.FileName).Replace('\\', '/');
+            var newPath = Path.Combine(ServerPanel.CurrentPath, newName).Replace('\\', '/');
+            try
+            {
+                await _ftpService.RenameAsync(oldPath, newPath, FtpConnectionSettings);
+                _logger.Log($"'{item.FileName}' переименован в '{newName}' на сервере.", LogLevel.Success);
+                await RefreshServerPanelAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка переименования: {ex.Message}", LogLevel.Error);
+            }
         }
 
-        private CreateFolderOnFtpServerCommand _createFolderOnFtpServerCommand;
-        public CreateFolderOnFtpServerCommand CreateFolderOnFtpServerCommand
+
+
+        private ContextMenu CreateLocalContextMenu()
         {
-            get => _createFolderOnFtpServerCommand;
-            set => SetProperty(ref _createFolderOnFtpServerCommand, value);
+            var menu = new ContextMenu();
+
+            var uploadMenuItem = new MenuItem { Header = "Загрузить на сервер" };
+            uploadMenuItem.Command = UploadCommand;
+            menu.Items.Add(uploadMenuItem);
+
+            var deleteMenuItem = new MenuItem { Header = "Удалить" };
+            deleteMenuItem.Command = DeleteLocalItemCommand;
+            menu.Items.Add(deleteMenuItem);
+
+            var createLocalDirectorMenuItem = new MenuItem { Header = "Создать папку" };
+            createLocalDirectorMenuItem.Command = CreateLocalDirectoryCommand;
+            menu.Items.Add(createLocalDirectorMenuItem);
+
+            var renameLocalItemMenuItem = new MenuItem { Header = "Переименовать" };
+            renameLocalItemMenuItem.Command = RenameLocalItemCommand;
+            menu.Items.Add(renameLocalItemMenuItem);
+            
+            return menu;
         }
 
-        private MouseClickCommand _mouseClickCommand;
-        public MouseClickCommand MouseClickCommand
+        private ContextMenu CreateServerContextMenu()
         {
-            get => _mouseClickCommand;
-            set => SetProperty(ref _mouseClickCommand, value);
+            var menu = new ContextMenu();
+
+            var downloadMenuItem = new MenuItem { Header = "Скачать" };
+            downloadMenuItem.Command = DownloadCommand;
+            menu.Items.Add(downloadMenuItem);
+
+            var deleteMenuItem = new MenuItem { Header = "Удалить" };
+            deleteMenuItem.Command = DeleteServerItemCommand;
+            menu.Items.Add(deleteMenuItem);
+
+            var createServerDirectorMenuItem = new MenuItem { Header = "Создать папку" };
+            createServerDirectorMenuItem.Command = CreateServerDirectoryCommand;
+            menu.Items.Add(createServerDirectorMenuItem);
+
+            var renameServerItemMenuItem = new MenuItem { Header = "Переименовать" };
+            renameServerItemMenuItem.Command = RenameServerItemCommand;
+            menu.Items.Add(renameServerItemMenuItem);
+
+
+            return menu;
         }
 
-        private ConnectFTPServerCommand _connectFTPServerCommand;
-        public ConnectFTPServerCommand ConnectFTPServerCommand
+
+        private bool CanOperateOnLocalItem() => LocalPanel.SelectedFileItem != null;
+        private void DeleteLocalItem()
         {
-            get => _connectFTPServerCommand;
-            set => SetProperty(ref _connectFTPServerCommand, value);
+            var item = LocalPanel.SelectedFileItem;
+            var path = Path.Combine(LocalPanel.CurrentPath, item.FileName);
+
+            if (_dialogService.ShowConfirmation("Подтверждение", $"Удалить '{item.FileName}'?"))
+            {
+                try
+                {
+                    _localFileService.DeleteItem(path);
+                    _logger.Log($"'{item.FileName}' удален.", LogLevel.Success);
+                    RefreshLocalPanel();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log($"Ошибка удаления: {ex.Message}", LogLevel.Error);
+                }
+            }
         }
 
-        private CreateDirectoryOnFTPServerCommand _createDirectory;
-        public CreateDirectoryOnFTPServerCommand CreateDirectoryOnFTPServerCommand
+        private bool CanOperateOnServerItem() => ServerPanel.SelectedFileItem != null && IsConnected;
+        private async Task DeleteServerItemAsync()
         {
-            get => _createDirectory;
-            set => SetProperty(ref _createDirectory, value);
+            var item = ServerPanel.SelectedFileItem;
+            var path = Path.Combine(ServerPanel.CurrentPath, item.FileName).Replace('\\', '/');
+
+            if (_dialogService.ShowConfirmation("Подтверждение", $"Удалить '{item.FileName}' с сервера?"))
+            {
+                try
+                {
+                    if (item.IsDirectory)
+                        await _ftpService.DeleteDirectoryAsync(path, FtpConnectionSettings);
+                    else
+                        await _ftpService.DeleteFileAsync(path, FtpConnectionSettings);
+
+                    _logger.Log($"'{item.FileName}' удален с сервера.", LogLevel.Success);
+                    await RefreshServerPanelAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log($"Ошибка удаления: {ex.Message}", LogLevel.Error);
+                }
+            }
         }
 
-        private OpenNewFolderDialogCommand _openNewFolderDialogCommand;
-        public OpenNewFolderDialogCommand OpenNewFolderDialogCommand
+        public ICommand CreateLocalDirectoryCommand { get; }
+        public ICommand CreateServerDirectoryCommand { get; }
+        public ICommand RenameLocalItemCommand { get; }
+        public ICommand RenameServerItemCommand { get; }
+
+        public ICommand DeleteLocalItemCommand { get; }
+        public ICommand DeleteServerItemCommand { get; }
+        public ICommand RefreshLocalPanelCommand { get; }
+        public ICommand RefreshServerPanelCommand { get; }
+
+        private void NavigateLocalDirectory(string path)
         {
-            get => _openNewFolderDialogCommand;
-            set => SetProperty(ref _openNewFolderDialogCommand, value);
+            try
+            {
+                if (path == LocalRootPath)
+                {
+                    LoadInitialDrives();
+                    return;
+                }
+
+                var items = _localFileService.GetDirectoryListing(path);
+                LocalPanel.LoadItems(items, path);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка навигации: {ex.Message}", LogLevel.Error);
+            }
         }
 
-        private DownloadFileCommand _downloadFileCommand;
-        public DownloadFileCommand DownloadFileCommand
+        private async Task NavigateServerDirectoryAsync(string path)
         {
-            get => _downloadFileCommand;
-            set => SetProperty(ref _downloadFileCommand, value);
+            if (!IsConnected) return;
+            _logger.Log($"Загрузка {path}...", LogLevel.Info);
+            try
+            {
+                var items = await _ftpService.GetDirectoryListingAsync(path, FtpConnectionSettings);
+                ServerPanel.LoadItems(items, path);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка навигации по FTP: {ex.Message}", LogLevel.Error);
+            }
         }
 
-        private OpenRenameDialogCommand _openRenameDialogCommand;
-        public OpenRenameDialogCommand OpenRenameDialogCommand
+        private void LoadInitialDrives()
         {
-            get => _openRenameDialogCommand;
-            set => SetProperty(ref _openRenameDialogCommand, value);
+            try
+            {
+                var drives = _localFileService.GetDrives();
+                LocalPanel.LoadItems(drives, LocalRootPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка загрузки дисков: {ex.Message}", LogLevel.Error);
+            }
         }
 
-        private RenameCommand _renameCommand;
-        public RenameCommand RenameCommand
-        {
-            get => _renameCommand;
-            set => SetProperty(ref _renameCommand, value);
-        }
-        #endregion FtpCommands
+        //private void NavigateLocalDirectory(string path)
+        //{
+        //    try
+        //    {
+        //        var items = _localFileService.GetDirectoryListing(path);
+        //        LocalPanel.LoadItems(items, path);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.Log($"Ошибка навигации: {ex.Message}", LogLevel.Error);
+        //    }
+        //}
 
-        #endregion FtpFileManager
+        private async Task ConnectAsync()
+        {
+            IsConnected = false;
+            ServerPanel.FilesAndFolders.Clear();
+
+            _logger.Log($"Подключение к {FtpConnectionSettings.Host}...", LogLevel.Info);
+            try
+            {
+                var files = await _ftpService.GetDirectoryListingAsync("/", FtpConnectionSettings);
+                ServerPanel.LoadItems(files, "/");
+                _logger.Log("Подключение успешно.", LogLevel.Success);
+
+                IsConnected = true;
+            }
+            catch (System.Exception ex)
+            {
+                _logger.Log($"Ошибка подключения: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        private async Task UploadAsync()
+        {
+            var localPath = Path.Combine(LocalPanel.CurrentPath, LocalPanel.SelectedFileItem.FileName);
+            var remoteDir = ServerPanel.CurrentPath;
+
+            _logger.Log($"Загрузка файла {LocalPanel.SelectedFileItem.FileName}...", LogLevel.Info);
+            try
+            {
+                // Просто вызываем метод сервиса
+                await _ftpService.UploadFileAsync(localPath, remoteDir, FtpConnectionSettings);
+                _logger.Log("Файл успешно загружен.", LogLevel.Success);
+
+                // Обновляем содержимое серверной панели после загрузки
+                await RefreshServerPanel();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка загрузки: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        // Новый приватный метод для обновления
+        private async Task RefreshServerPanel()
+        {
+            try
+            {
+                var files = await _ftpService.GetDirectoryListingAsync(ServerPanel.CurrentPath, FtpConnectionSettings);
+                ServerPanel.LoadItems(files, ServerPanel.CurrentPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка обновления: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+
+        #endregion
+
+        #region Логика Команд (Приватные методы)
+
+        private bool CanConnect()
+        {
+            return !string.IsNullOrEmpty(FtpConnectionSettings.Host) &&
+                   !string.IsNullOrEmpty(FtpConnectionSettings.Username);
+        }
+
+        private bool CanUpload()
+        {
+            bool isLocalFileSelected = LocalPanel.SelectedFileItem != null &&
+                                       LocalPanel.SelectedFileItem.FileType == FileItemType.File;
+
+            return isLocalFileSelected && IsConnected;
+        }
+
+        private bool _isConnected;
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set => SetProperty(ref _isConnected, value);
+        }
+
+
+        private bool CanDownload()
+        {
+            return ServerPanel.SelectedFileItem != null &&
+                   !ServerPanel.SelectedFileItem.IsDirectory &&
+                   IsConnected;
+        }
+
+        private async Task DownloadAsync()
+        {
+            var selectedFile = ServerPanel.SelectedFileItem;
+            var remoteFilePath = Path.Combine(ServerPanel.CurrentPath, selectedFile.FileName).Replace('\\', '/');
+            var localDirectory = LocalPanel.CurrentPath;
+
+            _logger.Log($"Скачивание файла '{selectedFile.FileName}'...", LogLevel.Info);
+            try
+            {
+                await _ftpService.DownloadFileAsync(remoteFilePath, localDirectory, FtpConnectionSettings);
+                _logger.Log("Файл успешно скачан.", LogLevel.Success);
+                RefreshLocalPanel();
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка скачивания файла: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        #endregion
+
+        #region Вспомогательные методы
+
+        private async Task RefreshServerPanelAsync()
+        {
+            if (!IsConnected) return;
+            try
+            {
+                var items = await _ftpService.GetDirectoryListingAsync(ServerPanel.CurrentPath, FtpConnectionSettings);
+                ServerPanel.LoadItems(items, ServerPanel.CurrentPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка обновления серверной панели: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        private void RefreshLocalPanel()
+        {
+            try
+            {
+                var items = _localFileService.GetDirectoryListing(LocalPanel.CurrentPath);
+                LocalPanel.LoadItems(items, LocalPanel.CurrentPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log($"Ошибка обновления локальной панели: {ex.Message}", LogLevel.Error);
+            }
+        }
+
+        #endregion
     }
 }
