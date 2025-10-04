@@ -35,7 +35,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Expander Style="{StaticResource ExpanderStyle}">
+        <cc:SidePanelControl Grid.Column="0" Header="Параметры подключения">
             <StackPanel Margin="10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -87,7 +87,8 @@
                             Command="{Binding ConnectCommand}" />
                 </Grid>
             </StackPanel>
-        </Expander>
+
+        </cc:SidePanelControl>
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>

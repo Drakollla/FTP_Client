@@ -12,7 +12,9 @@
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Margin" Value="5"/>
         <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="MinWidth" Value="100" />
         <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -36,7 +38,6 @@
     <Style x:Key="IconButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <!-- Цвет иконки по умолчанию -->
         <Setter Property="Width" Value="30"/>
         <Setter Property="Height" Value="30"/>
         <Setter Property="Margin" Value="5,0"/>
@@ -45,8 +46,6 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <!-- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ -->
-                    <!-- Мы говорим, что всё внутри этой рамки должно наследовать цвет Foreground от кнопки -->
                     <Border x:Name="border" 
                             Background="{TemplateBinding Background}" 
                             CornerRadius="15"
@@ -57,41 +56,11 @@
             </Setter.Value>
         </Setter>
 
-        <!-- УЛУЧШЕНИЕ: Добавляем триггер для смены цвета иконки при наведении -->
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
-                <!-- При наведении цвет иконки будет акцентным, а не просто белым -->
                 <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
-    <!--<Style x:Key="IconButton" TargetType="Button">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="Width" Value="30"/>
-        <Setter Property="Height" Value="30"/>
-        <Setter Property="Margin" Value="5,0"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="border" 
-                            Background="{TemplateBinding Background}" 
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            CornerRadius="15">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>-->
-
 </ResourceDictionary>
