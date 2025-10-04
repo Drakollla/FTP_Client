@@ -76,7 +76,7 @@
                     <Label Grid.Row="3" 
                            Content="Пароль: " />
 
-                    <cc:BindablePasswordBox Grid.Row="3"
+                    <cc:BindablePasswordBox Grid.Row="3" 
                                             Grid.Column="1"
                                             Password="{Binding FtpConnectionSettings.Password, Mode=TwoWay}" />
 
