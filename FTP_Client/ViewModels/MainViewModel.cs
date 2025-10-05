@@ -62,8 +62,8 @@ namespace FTP_Client.ViewModels
 
         public MainViewModel()
         {
-            LocalPanel = new FilePanelViewModel("Локальный диск");
-            ServerPanel = new FilePanelViewModel("FTP-Сервер");
+            LocalPanel = new FilePanelViewModel("Локальный диск", PanelType.Local);
+            ServerPanel = new FilePanelViewModel("FTP-Сервер", PanelType.Server);
 
             LocalPanel.NavigateRequested += NavigateLocalDirectory;
             ServerPanel.NavigateRequested += async (path) => await NavigateServerDirectoryAsync(path);
@@ -83,15 +83,14 @@ namespace FTP_Client.ViewModels
             RenameServerItemCommand = new RelayCommand(async _ => await RenameServerItemAsync(), _ => CanOperateOnServerItem());
 
 
-            LocalPanel.ContextMenu = CreateLocalContextMenu();
-            ServerPanel.ContextMenu = CreateServerContextMenu();
+            //LocalPanel.ContextMenu = CreateLocalContextMenu();
+            //ServerPanel.ContextMenu = CreateServerContextMenu();
 
             LoadInitialDrives();
         }
 
 
 
-        // --- Создание папки на локальном диске ---
         private void CreateLocalDirectory()
         {
             string newFolderName = _dialogService.ShowNewItemDialog("Создать папку", "Новая папка");
@@ -110,7 +109,6 @@ namespace FTP_Client.ViewModels
             }
         }
 
-        // --- Создание папки на сервере ---
         private async Task CreateServerDirectoryAsync()
         {
             string newFolderName = _dialogService.ShowNewItemDialog("Создать папку на сервере", "Новая папка");
@@ -129,7 +127,6 @@ namespace FTP_Client.ViewModels
             }
         }
 
-        // --- Переименование локального элемента ---
         private void RenameLocalItem()
         {
             var item = LocalPanel.SelectedFileItem;
@@ -150,7 +147,6 @@ namespace FTP_Client.ViewModels
             }
         }
 
-        // --- Переименование элемента на сервере ---
         private async Task RenameServerItemAsync()
         {
             var item = ServerPanel.SelectedFileItem;
@@ -191,8 +187,9 @@ namespace FTP_Client.ViewModels
 
             var renameLocalItemMenuItem = new MenuItem { Header = "Переименовать" };
             renameLocalItemMenuItem.Command = RenameLocalItemCommand;
+
             menu.Items.Add(renameLocalItemMenuItem);
-            
+
             return menu;
         }
 

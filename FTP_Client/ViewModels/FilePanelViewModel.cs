@@ -5,20 +5,19 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace FTP_Client.ViewModels
 {
     public class FilePanelViewModel : ObservableObject
     {
-        public ContextMenu ContextMenu { get; set; }
+        public PanelType PanelType { get; }
 
         public string Title { get; }
 
         public event Action<string> NavigateRequested;
 
-   
+
 
         public ObservableCollection<FileItem> FilesAndFolders { get; } = new();
 
@@ -47,9 +46,10 @@ namespace FTP_Client.ViewModels
         public ICommand GoHomeCommand { get; }
         public ICommand ItemDoubleClickCommand { get; }
 
-        public FilePanelViewModel(string title)
+        public FilePanelViewModel(string title, PanelType panelType)
         {
             Title = title;
+            PanelType = panelType;
             GoBackCommand = new RelayCommand(_ => GoBack(), _ => CanGoBack());
             GoForwardCommand = new RelayCommand(_ => GoForward(), _ => CanGoForward());
             ItemDoubleClickCommand = new RelayCommand(_ => NavigateToSelected(), _ => CanNavigateToSelected());
@@ -81,7 +81,7 @@ namespace FTP_Client.ViewModels
             {
                 ForwardStack.Push(CurrentPath);
                 var path = BackStack.Pop();
-                NavigateRequested?.Invoke(path); 
+                NavigateRequested?.Invoke(path);
             }
         }
 
@@ -92,7 +92,7 @@ namespace FTP_Client.ViewModels
             {
                 BackStack.Push(CurrentPath);
                 var path = ForwardStack.Pop();
-                NavigateRequested?.Invoke(path); 
+                NavigateRequested?.Invoke(path);
             }
         }
 
@@ -112,7 +112,7 @@ namespace FTP_Client.ViewModels
                 ForwardStack.Clear();
 
                 var newPath = Path.Combine(CurrentPath, SelectedFileItem.FileName);
-                NavigateRequested?.Invoke(newPath); 
+                NavigateRequested?.Invoke(newPath);
             }
         }
 

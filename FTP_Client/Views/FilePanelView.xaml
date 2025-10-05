@@ -7,6 +7,7 @@
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
+             xmlns:enums="clr-namespace:FTP_Client.Enums"
              Foreground="{StaticResource TextBrush}">
 
     <UserControl.Resources>
@@ -16,6 +17,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -62,7 +64,80 @@
 
         </StackPanel>
 
-        <DataGrid Grid.Row="1" Margin="10"
+        <Border Grid.Row="1" Margin="10,5,10,0"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal">
+                <Button ToolTip="Создать папку">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.CreateLocalDirectoryCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
+                                    <Setter Property="Command" Value="{Binding DataContext.CreateServerDirectoryCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 1 2 L 7 2 L 9 4 L 15 4 L 15 13 L 1 13 Z" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"/>
+                    </Viewbox>
+                </Button>
+
+                <Button ToolTip="Удалить">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.DeleteLocalItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
+                                    <Setter Property="Command" Value="{Binding DataContext.DeleteServerItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 2 4 L 14 4 L 13 15 L 3 15 Z M 4 1 L 12 1 L 12 3 L 4 3 Z M 0 2 L 16 2" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                    </Viewbox>
+                </Button>
+
+                <Button ToolTip="Переименовать">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.RenameLocalItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
+                                    <Setter Property="Command" Value="{Binding DataContext.RenameServerItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 2 14 L 14 14 M 3 11 L 13 11 M 8 0 L 5 11 M 8 0 L 11 11 M 4 7 L 12 7" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                    </Viewbox>
+                </Button>
+
+                <Button ToolTip="Обновить">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.RefreshLocalPanelCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
+                                    <Setter Property="Command" Value="{Binding DataContext.RefreshServerPanelCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 14.9 8.8 C 14.5 5.5 11.6 3 8 3 C 5.2 3 2.9 4.7 1.9 7 L 4 7 L 0 11 L 4 15 L 1.5 15 C 2.9 12.3 5.3 10.5 8.2 10.5 C 10.9 10.5 13.2 12.2 14 14.5 L 12 14.5 L 16 18.5 L 20 14.5 L 17 14.5 C 16.3 12.6 15.3 10.7 14.9 8.8 Z" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                    </Viewbox>
+                </Button>
+
+
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="2" Margin="10"
                   ItemsSource="{Binding FilesAndFolders}"
                   SelectedItem="{Binding SelectedFileItem}"
                   Style="{StaticResource BaseDataGrid}"

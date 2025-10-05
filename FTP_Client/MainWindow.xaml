@@ -48,7 +48,7 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <Label Content="Адрес сервера: " />
@@ -84,7 +84,9 @@
                             Grid.ColumnSpan="2"
                             Content="Подключиться"
                             Style="{StaticResource PrimaryButton}"
-                            Command="{Binding ConnectCommand}" />
+                            Command="{Binding ConnectCommand}"
+                            HorizontalAlignment="Stretch" 
+                            Margin="5,15,5,5" />
                 </Grid>
             </StackPanel>
 
