@@ -22,19 +22,19 @@ namespace FTP_Client.ViewModels
             LocalPanel.NavigateRequested += NavigateLocalDirectory;
             ServerPanel.NavigateRequested += async (path) => await NavigateServerDirectoryAsync(path);
 
-            ConnectCommand = new RelayCommand(async _ => await ConnectAsync(), _ => CanConnect);
+            ConnectCommand = new RelayCommand(async _ => await ConnectAsync(), _ => CanConnect());
             UploadCommand = new RelayCommand(async _ => await UploadAsync(), _ => CanUpload());
-            DownloadCommand = new RelayCommand(async _ => await DownloadAsync(), _ => CanDownload);
+            DownloadCommand = new RelayCommand(async _ => await DownloadAsync(), _ => CanDownload());
 
-            DeleteLocalItemCommand = new RelayCommand(_ => DeleteLocalItem(), _ => CanOperateOnLocalItem);
-            DeleteServerItemCommand = new RelayCommand(async _ => await DeleteServerItemAsync(), _ => CanOperateOnServerItem);
+            DeleteLocalItemCommand = new RelayCommand(_ => DeleteLocalItem(), _ => CanOperateOnLocalItem());
+            DeleteServerItemCommand = new RelayCommand(async _ => await DeleteServerItemAsync(), _ => CanOperateOnServerItem());
             RefreshLocalPanelCommand = new RelayCommand(_ => RefreshLocalPanel());
             RefreshServerPanelCommand = new RelayCommand(async _ => await RefreshServerPanelAsync(), _ => IsConnected);
 
             CreateLocalDirectoryCommand = new RelayCommand(_ => CreateLocalDirectory());
             CreateServerDirectoryCommand = new RelayCommand(async _ => await CreateServerDirectoryAsync(), _ => IsConnected);
-            RenameLocalItemCommand = new RelayCommand(_ => RenameLocalItem(), _ => CanOperateOnLocalItem);
-            RenameServerItemCommand = new RelayCommand(async _ => await RenameServerItemAsync(), _ => CanOperateOnServerItem);
+            RenameLocalItemCommand = new RelayCommand(_ => RenameLocalItem(), _ => CanOperateOnLocalItem());
+            RenameServerItemCommand = new RelayCommand(async _ => await RenameServerItemAsync(), _ => CanOperateOnServerItem());
 
             LoadInitialDrives();
         }
@@ -68,25 +68,13 @@ namespace FTP_Client.ViewModels
             set => SetProperty(ref _newItemName, value);
         }
 
-        private bool CanOperateOnLocalItem => LocalPanel.SelectedFileItem != null;
-
-        private bool CanOperateOnServerItem => ServerPanel.SelectedFileItem != null && IsConnected;
-
-        private bool CanConnect => !string.IsNullOrEmpty(FtpConnectionSettings.Host) &&
-                                   !string.IsNullOrEmpty(FtpConnectionSettings.Username);
-
         public bool IsConnected
         {
             get => _isConnected;
             private set => SetProperty(ref _isConnected, value);
         }
 
-        private bool CanDownload => ServerPanel.SelectedFileItem != null &&
-                                    !ServerPanel.SelectedFileItem.IsDirectory &&
-                                    IsConnected;
-
         #endregion
-
 
         #region Commands
 
@@ -96,16 +84,10 @@ namespace FTP_Client.ViewModels
         public ICommand ShowRenameDialogCommand { get; }
         public ICommand RenameItemCommand { get; }
         public ICommand CancelDialogCommand { get; }
-
-
-
         public ICommand CreateLocalDirectoryCommand { get; }
         public ICommand CreateServerDirectoryCommand { get; }
         public ICommand RenameLocalItemCommand { get; }
         public ICommand RenameServerItemCommand { get; }
-
-
-
         public ICommand DeleteLocalItemCommand { get; }
         public ICommand DeleteServerItemCommand { get; }
         public ICommand RefreshLocalPanelCommand { get; }
@@ -372,6 +354,17 @@ namespace FTP_Client.ViewModels
 
             return isLocalFileSelected && IsConnected;
         }
+
+        private bool CanOperateOnLocalItem() => LocalPanel.SelectedFileItem != null;
+
+        private bool CanOperateOnServerItem() => ServerPanel.SelectedFileItem != null && IsConnected;
+
+        private bool CanConnect() => !string.IsNullOrEmpty(FtpConnectionSettings.Host) &&
+                                     !string.IsNullOrEmpty(FtpConnectionSettings.Username);
+
+        private bool CanDownload() => ServerPanel.SelectedFileItem != null &&
+                                      !ServerPanel.SelectedFileItem.IsDirectory &&
+                                      IsConnected;
         #endregion
 
         #region HelpMethods
