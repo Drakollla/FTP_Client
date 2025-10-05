@@ -11,40 +11,7 @@ namespace FTP_Client.ViewModels
 {
     public class FilePanelViewModel : ObservableObject
     {
-        public PanelType PanelType { get; }
-
-        public string Title { get; }
-
         public event Action<string> NavigateRequested;
-
-
-
-        public ObservableCollection<FileItem> FilesAndFolders { get; } = new();
-
-        private FileItem _selectedFileItem;
-        public FileItem SelectedFileItem
-        {
-            get => _selectedFileItem;
-            set => SetProperty(ref _selectedFileItem, value);
-        }
-
-        private string _currentPath;
-        public string CurrentPath
-        {
-            get => _currentPath;
-            set => SetProperty(ref _currentPath, value);
-        }
-
-        public Stack<string> BackStack { get; } = new();
-        public Stack<string> ForwardStack { get; } = new();
-
-        //public ICommand NavigateBackCommand { get; }
-        //public ICommand NavigateForwardCommand { get; }
-        //public ICommand RefreshCommand { get; }
-        public ICommand GoBackCommand { get; }
-        public ICommand GoForwardCommand { get; }
-        public ICommand GoHomeCommand { get; }
-        public ICommand ItemDoubleClickCommand { get; }
 
         public FilePanelViewModel(string title, PanelType panelType)
         {
@@ -58,23 +25,37 @@ namespace FTP_Client.ViewModels
             GoHomeCommand = new RelayCommand(_ => NavigateHome(homePath));
         }
 
+        #region PropertiesAndFields
 
-        private void OnItemDoubleClick(object parameter)
+        private FileItem _selectedFileItem;
+        private string _currentPath;
+
+        public string Title { get; }
+
+        public PanelType PanelType { get; }
+
+        public ObservableCollection<FileItem> FilesAndFolders { get; } = new();
+
+        public Stack<string> BackStack { get; } = new();
+
+        public Stack<string> ForwardStack { get; } = new();
+
+        public FileItem SelectedFileItem
         {
-            if (SelectedFileItem.IsDirectory)
-            {
-                BackStack.Push(CurrentPath);
-                var newPath = Path.Combine(CurrentPath, SelectedFileItem.FileName);
-                // Вызываем событие, чтобы MainViewModel выполнил навигацию
-                NavigateRequested?.Invoke(newPath);
-            }
-            else
-            {
-                // Логика для двойного клика по файлу (например, просмотр)
-            }
+            get => _selectedFileItem;
+            set => SetProperty(ref _selectedFileItem, value);
         }
 
-        private bool CanGoBack() => BackStack.Count > 0;
+        public string CurrentPath
+        {
+            get => _currentPath;
+            set => SetProperty(ref _currentPath, value);
+        }
+      
+        #endregion
+
+        #region Methods
+
         private void GoBack()
         {
             if (BackStack.Count > 0)
@@ -85,7 +66,6 @@ namespace FTP_Client.ViewModels
             }
         }
 
-        private bool CanGoForward() => ForwardStack.Count > 0;
         private void GoForward()
         {
             if (ForwardStack.Count > 0)
@@ -103,7 +83,6 @@ namespace FTP_Client.ViewModels
             NavigateRequested?.Invoke(homePath);
         }
 
-        private bool CanNavigateToSelected() => SelectedFileItem != null && SelectedFileItem.IsDirectory;
         private void NavigateToSelected()
         {
             if (SelectedFileItem.IsDirectory)
@@ -115,8 +94,6 @@ namespace FTP_Client.ViewModels
                 NavigateRequested?.Invoke(newPath);
             }
         }
-
-
 
         public void LoadItems(IEnumerable<FileItem> items, string newPath)
         {
@@ -133,20 +110,24 @@ namespace FTP_Client.ViewModels
             });
 
             CurrentPath = newPath;
-
-            //(GoBackCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //(GoForwardCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
+        public void ClearFiles() => FilesAndFolders.Clear();
 
-        public void ClearFiles()
-        {
-            FilesAndFolders.Clear();
-        }
+        public void AddFile(FileItem file) => FilesAndFolders.Add(file);
 
-        public void AddFile(FileItem file)
-        {
-            FilesAndFolders.Add(file);
-        }
+        private bool CanGoBack() => BackStack.Count > 0;
+        private bool CanGoForward() => ForwardStack.Count > 0;
+        private bool CanNavigateToSelected() => SelectedFileItem != null && SelectedFileItem.IsDirectory;
+        #endregion
+
+        #region Commands
+
+        public ICommand GoBackCommand { get; }
+        public ICommand GoForwardCommand { get; }
+        public ICommand GoHomeCommand { get; }
+        public ICommand ItemDoubleClickCommand { get; }
+
+        #endregion
     }
 }
