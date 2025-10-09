@@ -1,0 +1,133 @@
+﻿using FTP_Client.Enums;
+using FTP_Client.Models;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
+
+namespace FTP_Client.ViewModels
+{
+    public class FilePanelViewModel : ObservableObject
+    {
+        public event Action<string> NavigateRequested;
+
+        public FilePanelViewModel(string title, PanelType panelType)
+        {
+            Title = title;
+            PanelType = panelType;
+            GoBackCommand = new RelayCommand(_ => GoBack(), _ => CanGoBack());
+            GoForwardCommand = new RelayCommand(_ => GoForward(), _ => CanGoForward());
+            ItemDoubleClickCommand = new RelayCommand(_ => NavigateToSelected(), _ => CanNavigateToSelected());
+
+            var homePath = title == "Локальный диск" ? MainViewModel.LocalRootPath : "/";
+            GoHomeCommand = new RelayCommand(_ => NavigateHome(homePath));
+        }
+
+        #region PropertiesAndFields
+
+        private FileItem _selectedFileItem;
+        private string _currentPath;
+
+        public string Title { get; }
+
+        public PanelType PanelType { get; }
+
+        public ObservableCollection<FileItem> FilesAndFolders { get; } = new();
+
+        public Stack<string> BackStack { get; } = new();
+
+        public Stack<string> ForwardStack { get; } = new();
+
+        public FileItem SelectedFileItem
+        {
+            get => _selectedFileItem;
+            set => SetProperty(ref _selectedFileItem, value);
+        }
+
+        public string CurrentPath
+        {
+            get => _currentPath;
+            set => SetProperty(ref _currentPath, value);
+        }
+      
+        #endregion
+
+        #region Methods
+
+        private void GoBack()
+        {
+            if (BackStack.Count > 0)
+            {
+                ForwardStack.Push(CurrentPath);
+                var path = BackStack.Pop();
+                NavigateRequested?.Invoke(path);
+            }
+        }
+
+        private void GoForward()
+        {
+            if (ForwardStack.Count > 0)
+            {
+                BackStack.Push(CurrentPath);
+                var path = ForwardStack.Pop();
+                NavigateRequested?.Invoke(path);
+            }
+        }
+
+        private void NavigateHome(string homePath)
+        {
+            BackStack.Clear();
+            ForwardStack.Clear();
+            NavigateRequested?.Invoke(homePath);
+        }
+
+        private void NavigateToSelected()
+        {
+            if (SelectedFileItem.IsDirectory)
+            {
+                BackStack.Push(CurrentPath);
+                ForwardStack.Clear();
+
+                var newPath = Path.Combine(CurrentPath, SelectedFileItem.FileName);
+                NavigateRequested?.Invoke(newPath);
+            }
+        }
+
+        public void LoadItems(IEnumerable<FileItem> items, string newPath)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                FilesAndFolders.Clear();
+                if (items != null)
+                {
+                    foreach (var item in items)
+                    {
+                        FilesAndFolders.Add(item);
+                    }
+                }
+            });
+
+            CurrentPath = newPath;
+        }
+
+        public void ClearFiles() => FilesAndFolders.Clear();
+
+        public void AddFile(FileItem file) => FilesAndFolders.Add(file);
+
+        private bool CanGoBack() => BackStack.Count > 0;
+        private bool CanGoForward() => ForwardStack.Count > 0;
+        private bool CanNavigateToSelected() => SelectedFileItem != null && SelectedFileItem.IsDirectory;
+        #endregion
+
+        #region Commands
+
+        public ICommand GoBackCommand { get; }
+        public ICommand GoForwardCommand { get; }
+        public ICommand GoHomeCommand { get; }
+        public ICommand ItemDoubleClickCommand { get; }
+
+        #endregion
+    }
+}

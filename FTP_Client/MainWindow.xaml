@@ -7,16 +7,18 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:converter="clr-namespace:FTP_Client.Converters"
         xmlns:cc="clr-namespace:FTP_Client.Resources.Controls"
+        xmlns:views="clr-namespace:FTP_Client.Views"
         mc:Ignorable="d"
         Title="FTP-клиент"
         WindowStartupLocation="CenterScreen"
         Icon="Resources/ftp.ico"
-        Background="#D8E6EF"
-        Height="450" 
-        Width="800">
+        Background="{StaticResource WindowBackgroundBrush}"
+        Foreground="{StaticResource TextBrush}"   
+        Height="600" 
+        MinWidth="1000">
 
     <Window.DataContext>
-        <local:MainViewModel/>
+        <local:MainViewModel />
     </Window.DataContext>
 
     <Window.Resources>
@@ -24,36 +26,7 @@
         <converter:FileTypeToBooleanConverter x:Key="FileTypeToBooleanConverter" />
         <converter:DateConverter x:Key="DateConverter" />
         <converter:IsTxtFileConverter x:Key="IsTxtFileConverter" />
-
-        <ContextMenu x:Key="ListViewContextMenu">
-            <MenuItem Header="{Binding DownloadFileCommand.CommandName}" 
-                      Command="{Binding DownloadFileCommand}"
-                      IsEnabled="{Binding SelectedFileItemServer.FileType, Converter={StaticResource FileTypeToBooleanConverter}}" />
-            <MenuItem Header="{Binding OpenRenameDialogCommand.CommandName}"
-                      Command="{Binding OpenRenameDialogCommand}" />
-            <MenuItem Header="{Binding OpenCreateDialogCommand.CommandName}" 
-                      Command="{Binding OpenCreateDialogCommand}" />
-            <MenuItem Header="{Binding OpenCreateFileDialogCommand.CommandName}" 
-                      Command="{Binding OpenCreateFileDialogCommand}" />
-            <MenuItem Header="{Binding UpdateCommand.CommandName}"
-                      Command="{Binding UpdateCommand}" CommandParameter="server" />
-            <MenuItem Header="{Binding ViewFileCommand.CommandName}"
-                      Command="{Binding ViewFileCommand}" 
-                      IsEnabled="{Binding SelectedFileItemServer.FileType, Converter={StaticResource IsTxtFileConverter}}"/>
-            <MenuItem Header="{Binding DeleteFileCommand.CommandName}"
-                      Command="{Binding DeleteFileCommand}" CommandParameter="server" />
-        </ContextMenu>
-
-        <ContextMenu x:Key="ListViewContextMenuLocal">
-            <MenuItem Header="{Binding UploadFileCommand.CommandName}" 
-                      Command="{Binding UploadFileCommand}" />
-            <MenuItem Header="{Binding ViewLocalTxtFile.CommandName}"
-                      Command="{Binding ViewLocalTxtFile}" />
-            <MenuItem Header="{Binding UpdateCommand.CommandName}" 
-                      Command="{Binding UpdateCommand}" CommandParameter="local" />
-            <MenuItem Header="{Binding DeleteFileCommand.CommandName}" 
-                      Command="{Binding DeleteFileCommand}" CommandParameter="local" />
-        </ContextMenu>
+        <converter:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter" />
     </Window.Resources>
 
     <Grid>
@@ -62,27 +35,8 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Expander ExpandDirection="Left">
-            <Expander.Style>
-                <Style TargetType="Expander">
-                    <Setter Property="IsExpanded" Value="False" />
-                    <Style.Triggers>
-                        <EventTrigger RoutedEvent="MouseLeave">
-                            <BeginStoryboard  x:Name="test">
-                                <Storyboard x:Name="closeStoryboard">
-                                    <BooleanAnimationUsingKeyFrames Storyboard.TargetProperty="IsExpanded">
-                                        <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="False" />
-                                    </BooleanAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                        <EventTrigger RoutedEvent="MouseEnter">
-                            <StopStoryboard BeginStoryboardName="test" />
-                        </EventTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Expander.Style>
-            <StackPanel>
+        <cc:SidePanelControl Grid.Column="0" Header="Параметры подключения">
+            <StackPanel Margin="10">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -94,278 +48,82 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Label Content="Адрес сервера: "
-                           Style="{StaticResource LabelStyle}" />
+                    <Label Content="Адрес сервера: " />
 
                     <TextBox Grid.Column="1"
-                             Style="{StaticResource TextBoxStyle}"
-                             Text="{Binding FtpConnectionSettings.ServerAddress}" />
+                             Style="{StaticResource TextBox}"
+                             Text="{Binding FtpConnectionSettings.Host}" />
 
                     <Label Content="Порт: "
-                           Grid.Row="1"
-                           Style="{StaticResource LabelStyle}" />
+                           Grid.Row="1" />
 
-                    <TextBox Grid.Column="1"
+                    <TextBox Grid.Column="1" 
                              Grid.Row="1"
-                             Style="{StaticResource TextBoxStyle}"
+                             Style="{StaticResource TextBox}"
                              Text="{Binding FtpConnectionSettings.Port}" />
 
                     <Label Grid.Row="2" 
-                           Content="Логин: "
-                           Style="{StaticResource LabelStyle}" />
+                           Content="Логин: " />
 
-                    <TextBox Grid.Row="2"
+                    <TextBox Grid.Row="2" 
                              Grid.Column="1"
-                             Style="{StaticResource TextBoxStyle}"
+                             Style="{StaticResource TextBox}"
                              Text="{Binding FtpConnectionSettings.Username}" />
 
-                    <Label Grid.Row="3"  
-                           Content="Пароль: "
-                           Style="{StaticResource LabelStyle}" />
+                    <Label Grid.Row="3" 
+                           Content="Пароль: " />
 
-                    <cc:BindablePasswordBox Grid.Row="3"
+                    <cc:BindablePasswordBox Grid.Row="3" 
                                             Grid.Column="1"
-                                            Padding="5" 
-                                            Password="{Binding FtpConnectionSettings.Password}" />
+                                            Password="{Binding FtpConnectionSettings.Password, Mode=TwoWay}" />
 
-                    <Button Grid.Row="4"
+                    <Button Grid.Row="4" 
                             Grid.ColumnSpan="2"
-                            MaxWidth="150"
-                            MinHeight="30"
-                            Padding="5"
-                            Margin="5"
                             Content="Подключиться"
-                            Style="{StaticResource RoundButtonStyle}"
-                            Command="{Binding ConnectFTPServerCommand}" />
-
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding ConnectCommand}"
+                            HorizontalAlignment="Stretch" 
+                            Margin="5,15,5,5" />
                 </Grid>
             </StackPanel>
 
-        </Expander>
+        </cc:SidePanelControl>
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--for local-->
-            <Grid MinWidth="200">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <views:FilePanelView Grid.Column="0" 
+                                 DataContext="{Binding LocalPanel}" />
 
-                <StackPanel Margin="10"
-                            Orientation="Horizontal">
-                    <Button Width="30"
-                            Command="{Binding BackCommand}"
-                            CommandParameter="local"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Button.Content>
-                            <Path Data="M4,0 L0,4 L4,8" 
-                                  Stroke="Black" 
-                                  StrokeThickness="1" />
-                        </Button.Content>
-                    </Button>
+            <GridSplitter Grid.Column="1" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Stretch" />
 
-                    <Button Width="30"
-                            Command="{Binding ForwardCommand}"
-                            CommandParameter="local"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Button.Content>
-                            <Path Data="M0,0 L4,4 L0,8" 
-                                  Stroke="Black" 
-                                  StrokeThickness="1" />
-                        </Button.Content>
-                    </Button>
+            <views:FilePanelView Grid.Column="2" 
+                                 DataContext="{Binding ServerPanel}" />
 
-                    <Button Width="30"
-                            Command="{Binding MainPaigeCommand}"
-                            CommandParameter="local"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Viewbox Width="20" Height="20">
-                            <Grid>
-                                <Polygon Points="0,8 10,0 20,8" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
-                                <Rectangle Width="15" Height="12" Margin="0,8,0,0" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
-                            </Grid>
-                        </Viewbox>
-                    </Button>
-
-                    <TextBlock Margin="10"
-                               VerticalAlignment="Center" 
-                               Text="{Binding CurrentPathLocal}" />
-                </StackPanel>
-
-                <ListView Grid.Row="1" 
-                          Margin="10" 
-                          ItemsSource="{Binding FilesAndFoldersLocal}" 
-                          SelectedItem="{Binding SelectedFileItemLocal}"
-                          ContextMenu="{StaticResource ListViewContextMenuLocal}">
-
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding MouseClickCommand}"
-                                                   CommandParameter="local" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Width="100"
-                                            Header="Наименование" 
-                                            DisplayMemberBinding="{Binding FileName}" />
-
-                            <GridViewColumn Width="100"
-                                            Header="Дата изменения" 
-                                            DisplayMemberBinding="{Binding LastModified}" />
-
-                            <GridViewColumn Width="50"
-                                            Header="Тип" 
-                                            DisplayMemberBinding="{Binding FileType}" />
-
-                            <GridViewColumn Header="Размер" 
-                                            DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
-                        </GridView>
-                    </ListView.View>
-
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#CAD7DC" />
-                                </Trigger>
-
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#5D7581" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-
-                </ListView>
-            </Grid>
-
-            <!--/for server/-->
-            <Grid Grid.Column="2"
-                  MinWidth="200">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <StackPanel Margin="10"
-                            Orientation="Horizontal">
-
-                    <Button Width="30"
-                            Command="{Binding BackCommand}"
-                            CommandParameter="server"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Button.Content>
-                            <Path Data="M4,0 L0,4 L4,8" 
-                                  Stroke="Black" 
-                                  StrokeThickness="1" />
-                        </Button.Content>
-                    </Button>
-
-                    <Button Width="30" 
-                            Command="{Binding ForwardCommand}"
-                            CommandParameter="server"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Button.Content>
-                            <Path Data="M0,0 L4,4 L0,8" 
-                                  Stroke="Black" 
-                                  StrokeThickness="1" />
-                        </Button.Content>
-                    </Button>
-
-                    <Button Width="30"
-                            Command="{Binding MainPaigeCommand}"
-                            CommandParameter="server"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Viewbox Width="20" Height="20">
-                            <Grid>
-                                <Polygon Points="0,8 10,0 20,8" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
-                                <Rectangle Width="15" Height="12" Margin="0,8,0,0" Stroke="Black" StrokeThickness="1" Fill="Transparent" />
-                            </Grid>
-                        </Viewbox>
-                    </Button>
-
-                    <TextBlock Margin="10"
-                               VerticalAlignment="Center" 
-                               Text="{Binding CurrentPathServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                </StackPanel>
-
-                <ListView Grid.Row="1" 
-                          Grid.Column="1" 
-                          Margin="10"
-                          ItemsSource="{Binding FilesAndFoldersServer}"
-                          SelectedItem="{Binding SelectedFileItemServer}"
-                          ContextMenu="{StaticResource ListViewContextMenu}">
-
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding MouseClickCommand}"
-                                                   CommandParameter="server" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Width="100"
-                                            Header="Наименование" 
-                                            DisplayMemberBinding="{Binding FileName}" />
-
-                            <GridViewColumn Width="100"
-                                            Header="Дата изменения" 
-                                            DisplayMemberBinding="{Binding LastModified, Converter={StaticResource DateConverter}}" />
-
-                            <GridViewColumn Width="50"
-                                            Header="Тип" 
-                                            DisplayMemberBinding="{Binding FileType}" />
-
-                            <GridViewColumn Header="Размер" 
-                                            DisplayMemberBinding="{Binding Size, Converter={StaticResource FolderSizeConverter}}" />
-                        </GridView>
-                    </ListView.View>
-
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#CAD7DC" />
-                                </Trigger>
-
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#5D7581" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-
-                </ListView>
-            </Grid>
-
-            <ListBox Grid.Row="1"
-                     Grid.ColumnSpan="2"
+            <ListBox Grid.Row="1" 
+                     Grid.ColumnSpan="3"
                      Margin="10" 
-                     MaxHeight="100"
-                     MinHeight="50"
+                     MinHeight="100" MaxHeight="200"
                      ItemsSource="{Binding LogMessages}"
-                     SelectedItem="{Binding SelectedLogMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                     Style="{StaticResource LogListBox}">
+
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Text}"
-                                   Foreground="{Binding MessageColor}" />
+                        <TextBlock Text="{Binding Text}" 
+                                   Foreground="{Binding Level, Converter={StaticResource LogLevelToBrushConverter}}" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
