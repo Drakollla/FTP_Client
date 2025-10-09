@@ -5,6 +5,7 @@ using FTP_Client.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -19,6 +20,8 @@ namespace FTP_Client.ViewModels
             LocalPanel = new FilePanelViewModel("Локальный диск", PanelType.Local);
             ServerPanel = new FilePanelViewModel("FTP-Сервер", PanelType.Server);
 
+            _fileEditorService = new FileEditorService(_ftpService, _logger);
+
             LocalPanel.NavigateRequested += NavigateLocalDirectory;
             ServerPanel.NavigateRequested += async (path) => await NavigateServerDirectoryAsync(path);
 
@@ -31,10 +34,12 @@ namespace FTP_Client.ViewModels
             RefreshLocalPanelCommand = new RelayCommand(_ => RefreshLocalPanel());
             RefreshServerPanelCommand = new RelayCommand(async _ => await RefreshServerPanelAsync(), _ => IsConnected);
 
-            CreateLocalDirectoryCommand = new RelayCommand(_ => CreateLocalDirectory());
+            CreateLocalDirectoryCommand = new RelayCommand(_ => CreateLocalDirectory(), _ => CanCreateLocalDirectory());
             CreateServerDirectoryCommand = new RelayCommand(async _ => await CreateServerDirectoryAsync(), _ => IsConnected);
             RenameLocalItemCommand = new RelayCommand(_ => RenameLocalItem(), _ => CanOperateOnLocalItem());
             RenameServerItemCommand = new RelayCommand(async _ => await RenameServerItemAsync(), _ => CanOperateOnServerItem());
+
+            EditServerFileCommand = new RelayCommand(async _ => await EditServerFileAsync(), _ => CanEditServerFile());
 
             LoadInitialDrives();
         }
@@ -44,6 +49,7 @@ namespace FTP_Client.ViewModels
         private readonly ILocalFileService _localFileService = new LocalFileService();
         private readonly IFtpService _ftpService = new FtpService();
         private readonly IDialogService _dialogService = new DialogService();
+        private readonly IFileEditorService _fileEditorService;
         #endregion
 
         #region PropertiesAndFields
@@ -92,6 +98,8 @@ namespace FTP_Client.ViewModels
         public ICommand DeleteServerItemCommand { get; }
         public ICommand RefreshLocalPanelCommand { get; }
         public ICommand RefreshServerPanelCommand { get; }
+        public ICommand CreateLocalFileCommand { get; }
+        public ICommand EditServerFileCommand { get; }
         #endregion
 
         #region Methods
@@ -141,10 +149,17 @@ namespace FTP_Client.ViewModels
         private void RenameLocalItem()
         {
             var item = LocalPanel.SelectedFileItem;
-            string newName = _dialogService.ShowNewItemDialog("Переименовать", item.FileName);
+            
+            if (item == null) 
+                return;
+
+            string newName = _dialogService.ShowNewItemDialog("Переименовать", "", item.FileName);
 
             if (string.IsNullOrWhiteSpace(newName) || newName == item.FileName)
                 return;
+
+            if (!item.IsDirectory && !Path.HasExtension(newName))
+                newName += Path.GetExtension(item.FileName);
 
             var oldPath = Path.Combine(LocalPanel.CurrentPath, item.FileName);
             var newPath = Path.Combine(LocalPanel.CurrentPath, newName);
@@ -164,10 +179,17 @@ namespace FTP_Client.ViewModels
         private async Task RenameServerItemAsync()
         {
             var item = ServerPanel.SelectedFileItem;
-            string newName = _dialogService.ShowNewItemDialog("Переименовать на сервере", item.FileName);
+            
+            if (item == null)
+                return;
+
+            string newName = _dialogService.ShowNewItemDialog("Переименовать на сервере", "", item.FileName);
 
             if (string.IsNullOrWhiteSpace(newName) || newName == item.FileName)
                 return;
+
+            if (!item.IsDirectory && !Path.HasExtension(newName))
+                newName += Path.GetExtension(item.FileName);
 
             var oldPath = Path.Combine(ServerPanel.CurrentPath, item.FileName).Replace('\\', '/');
             var newPath = Path.Combine(ServerPanel.CurrentPath, newName).Replace('\\', '/');
@@ -183,7 +205,7 @@ namespace FTP_Client.ViewModels
                 _logger.Log($"Ошибка переименования: {ex.Message}", LogLevel.Error);
             }
         }
-
+        
         private void DeleteLocalItem()
         {
             var item = LocalPanel.SelectedFileItem;
@@ -209,7 +231,7 @@ namespace FTP_Client.ViewModels
             var item = ServerPanel.SelectedFileItem;
             var path = Path.Combine(ServerPanel.CurrentPath, item.FileName).Replace('\\', '/');
 
-            if (_dialogService.ShowConfirmation("Подтверждение", $"Удалить '{item.FileName}' с сервера?"))
+            if (_dialogService.ShowConfirmation("Подтверждение", $"Удалить файл '{item.FileName}' с сервера?"))
             {
                 try
                 {
@@ -218,7 +240,7 @@ namespace FTP_Client.ViewModels
                     else
                         await _ftpService.DeleteFileAsync(path, FtpConnectionSettings);
 
-                    _logger.Log($"'{item.FileName}' удален с сервера.", LogLevel.Success);
+                    _logger.Log($"Файл '{item.FileName}' удален с сервера.", LogLevel.Success);
                     await RefreshServerPanelAsync();
                 }
                 catch (Exception ex)
@@ -249,8 +271,10 @@ namespace FTP_Client.ViewModels
 
         private async Task NavigateServerDirectoryAsync(string path)
         {
-            if (!IsConnected) return;
+            if (!IsConnected)
+                return;
             _logger.Log($"Загрузка {path}...", LogLevel.Info);
+
             try
             {
                 var items = await _ftpService.GetDirectoryListingAsync(path, FtpConnectionSettings);
@@ -281,6 +305,7 @@ namespace FTP_Client.ViewModels
             ServerPanel.FilesAndFolders.Clear();
 
             _logger.Log($"Подключение к {FtpConnectionSettings.Host}...", LogLevel.Info);
+
             try
             {
                 var files = await _ftpService.GetDirectoryListingAsync("/", FtpConnectionSettings);
@@ -289,7 +314,7 @@ namespace FTP_Client.ViewModels
 
                 IsConnected = true;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.Log($"Ошибка подключения: {ex.Message}", LogLevel.Error);
             }
@@ -297,54 +322,91 @@ namespace FTP_Client.ViewModels
 
         private async Task UploadAsync()
         {
-            var localPath = Path.Combine(LocalPanel.CurrentPath, LocalPanel.SelectedFileItem.FileName);
+
+
+
+            var selectedLocalItem = LocalPanel.SelectedFileItem;
+            
+            if (selectedLocalItem == null) 
+                return;
+
+            var localPath = Path.Combine(LocalPanel.CurrentPath, selectedLocalItem.FileName);
             var remoteDir = ServerPanel.CurrentPath;
 
-            _logger.Log($"Загрузка файла {LocalPanel.SelectedFileItem.FileName}...", LogLevel.Info);
+            _logger.Log($"Начало передачи '{selectedLocalItem.FileName}' на сервер...", LogLevel.Info);
+
             try
             {
-                await _ftpService.UploadFileAsync(localPath, remoteDir, FtpConnectionSettings);
-                _logger.Log("Файл успешно загружен.", LogLevel.Success);
+                if (selectedLocalItem.IsDirectory)
+                {
+                    await _ftpService.UploadDirectoryAsync(localPath, remoteDir, FtpConnectionSettings);
+                    _logger.Log($"Папка '{selectedLocalItem.FileName}' успешно загружена.", LogLevel.Success);
+                }
+                else
+                {
+                    var remoteFilePath = Path.Combine(remoteDir, selectedLocalItem.FileName).Replace('\\', '/');
+                    await _ftpService.UploadFileAsync(localPath, remoteFilePath, FtpConnectionSettings);
+                    _logger.Log($"Файл '{selectedLocalItem.FileName}' успешно загружен.", LogLevel.Success);
+                }
 
-                await RefreshServerPanel();
+                await RefreshServerPanelAsync();
             }
             catch (Exception ex)
             {
-                _logger.Log($"Ошибка загрузки: {ex.Message}", LogLevel.Error);
-            }
-        }
-
-
-        private async Task RefreshServerPanel()
-        {
-            try
-            {
-                var files = await _ftpService.GetDirectoryListingAsync(ServerPanel.CurrentPath, FtpConnectionSettings);
-                ServerPanel.LoadItems(files, ServerPanel.CurrentPath);
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"Ошибка обновления: {ex.Message}", LogLevel.Error);
+                _logger.Log($"Ошибка передачи: {ex.Message}", LogLevel.Error);
             }
         }
 
         private async Task DownloadAsync()
         {
-            var selectedFile = ServerPanel.SelectedFileItem;
-            var remoteFilePath = Path.Combine(ServerPanel.CurrentPath, selectedFile.FileName).Replace('\\', '/');
-            var localDirectory = LocalPanel.CurrentPath;
+            var selectedRemoteItem = ServerPanel.SelectedFileItem;
+            if (selectedRemoteItem == null) return;
 
-            _logger.Log($"Скачивание файла '{selectedFile.FileName}'...", LogLevel.Info);
+            var remotePath = Path.Combine(ServerPanel.CurrentPath, selectedRemoteItem.FileName).Replace('\\', '/');
+            var localDir = LocalPanel.CurrentPath;
+
+            _logger.Log($"Начало скачивания '{selectedRemoteItem.FileName}'...", LogLevel.Info);
             try
             {
-                await _ftpService.DownloadFileAsync(remoteFilePath, localDirectory, FtpConnectionSettings);
-                _logger.Log("Файл успешно скачан.", LogLevel.Success);
+                if (selectedRemoteItem.IsDirectory)
+                {
+                    await _ftpService.DownloadDirectoryAsync(remotePath, localDir, FtpConnectionSettings);
+                    _logger.Log($"Папка '{selectedRemoteItem.FileName}' успешно скачана.", LogLevel.Success);
+                }
+                else
+                {
+                    await _ftpService.DownloadFileAsync(remotePath, localDir, FtpConnectionSettings);
+                    _logger.Log($"Файл '{selectedRemoteItem.FileName}' успешно скачан.", LogLevel.Success);
+                }
+
                 RefreshLocalPanel();
             }
             catch (Exception ex)
             {
-                _logger.Log($"Ошибка скачивания файла: {ex.Message}", LogLevel.Error);
+                _logger.Log($"Ошибка скачивания: {ex.Message}", LogLevel.Error);
             }
+        }
+
+        private async Task EditServerFileAsync()
+        {
+            var selectedFile = ServerPanel.SelectedFileItem;
+
+            if (selectedFile == null) 
+                return;
+
+            await _fileEditorService.EditRemoteFileAsync(selectedFile, ServerPanel.CurrentPath, FtpConnectionSettings);
+
+            await RefreshServerPanelAsync();
+        }
+
+        private bool CanEditServerFile()
+        {
+            if (ServerPanel.SelectedFileItem == null || ServerPanel.SelectedFileItem.IsDirectory || !IsConnected)
+                return false;
+
+            var extension = Path.GetExtension(ServerPanel.SelectedFileItem.FileName).ToLower();
+            
+            return extension == ".txt" || extension == ".json" || extension == ".xml" || extension == ".log";
         }
 
         private bool CanUpload()
@@ -365,13 +427,17 @@ namespace FTP_Client.ViewModels
         private bool CanDownload() => ServerPanel.SelectedFileItem != null &&
                                       !ServerPanel.SelectedFileItem.IsDirectory &&
                                       IsConnected;
+
+        private bool CanCreateLocalDirectory() => LocalPanel.CurrentPath != LocalRootPath;
         #endregion
 
         #region HelpMethods
 
         private async Task RefreshServerPanelAsync()
         {
-            if (!IsConnected) return;
+            if (!IsConnected) 
+                return;
+
             try
             {
                 var items = await _ftpService.GetDirectoryListingAsync(ServerPanel.CurrentPath, FtpConnectionSettings);

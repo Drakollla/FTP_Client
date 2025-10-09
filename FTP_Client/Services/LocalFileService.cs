@@ -26,6 +26,7 @@ namespace FTP_Client.Services
             foreach (var directory in Directory.GetDirectories(folderPath))
             {
                 var dirInfo = new DirectoryInfo(directory);
+
                 items.Add(new FileItem
                 {
                     FileName = dirInfo.Name,
@@ -40,6 +41,7 @@ namespace FTP_Client.Services
                 items.Add(new FileItem
                 {
                     FileName = fileInfo.Name,
+                    FileType = FileItemType.File,
                     Extension = fileInfo.Extension,
                     LastModified = fileInfo.LastWriteTime,
                     Size = fileInfo.Length

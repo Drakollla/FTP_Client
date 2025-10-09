@@ -16,9 +16,13 @@ namespace FTP_Client.Services
         Task DeleteFileAsync(string remotePath, FtpConnectionSettings settings);
 
         Task DeleteDirectoryAsync(string remotePath, FtpConnectionSettings settings);
-        
+
         Task CreateDirectoryAsync(string remotePath, FtpConnectionSettings settings);
 
         Task RenameAsync(string oldRemotePath, string newRemotePath, FtpConnectionSettings settings);
+
+        Task UploadDirectoryAsync(string localDirectoryPath, string remoteParentDirectoryPath, FtpConnectionSettings settings);
+        
+        Task DownloadDirectoryAsync(string remoteDirectoryPath, string localParentDirectoryPath, FtpConnectionSettings settings);
     }
 }

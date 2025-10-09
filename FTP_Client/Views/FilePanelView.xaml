@@ -72,6 +72,7 @@
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
                             <Setter Property="Command" Value="{Binding DataContext.CreateLocalDirectoryCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
                                     <Setter Property="Command" Value="{Binding DataContext.CreateServerDirectoryCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
@@ -79,15 +80,48 @@
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    
-                    <Viewbox Width="12" Height="12">
-                        <Path Data="M 1 2 L 7 2 L 9 4 L 15 4 L 15 13 L 1 13 Z" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"/>
+
+                    <Viewbox Width="12" 
+                             Height="12">
+                        <Path Data="M 1 2 L 7 2 L 9 4 L 15 4 L 15 13 L 1 13 Z" 
+                              Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"/>
                     </Viewbox>
                 </Button>
+
+                <Button ToolTip="Переименовать">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.RenameLocalItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
+                                    <Setter Property="Command" Value="{Binding DataContext.RenameServerItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 2 14 L 14 14 M 3 11 L 13 11 M 8 0 L 5 11 M 8 0 L 11 11 M 4 7 L 12 7" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                    </Viewbox>
+                </Button>
+
+                <!--<Button ToolTip="Создать файл">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.CreateLocalFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+                        </Style>
+                    </Button.Style>
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 7 0 L 9 0 L 9 7 L 16 7 L 16 9 L 9 9 L 9 16 L 7 16 L 7 9 L 0 9 L 0 7 L 7 7 Z" 
+                              Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </Viewbox>
+                </Button>-->
 
                 <Button ToolTip="Удалить">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
                             <Setter Property="Command" Value="{Binding DataContext.DeleteLocalItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
@@ -101,19 +135,36 @@
                     </Viewbox>
                 </Button>
 
-                <Button ToolTip="Переименовать">
+                <Button>
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
-                            <Setter Property="Command" Value="{Binding DataContext.RenameLocalItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="Command" Value="{Binding DataContext.UploadCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="ToolTip" Value="Загрузить выбранный файл на сервер"/>
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
-                                    <Setter Property="Command" Value="{Binding DataContext.RenameServerItemCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                    <Setter Property="Command" Value="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                                    <Setter Property="ToolTip" Value="Скачать выбранный файл с сервера"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
+
                     <Viewbox Width="12" Height="12">
-                        <Path Data="M 2 14 L 14 14 M 3 11 L 13 11 M 8 0 L 5 11 M 8 0 L 11 11 M 4 7 L 12 7" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                        <Path Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}">
+                            <Path.Style>
+                                <Style TargetType="Path">
+                                    <Setter Property="Data" Value="M 8 0 L 16 8 L 13 8 L 13 16 L 3 16 L 3 8 L 0 8 Z"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.PanelType, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" Value="{x:Static enums:PanelType.Server}">
+                                            <Setter Property="Data" Value="M 8 16 L 0 8 L 3 8 L 3 0 L 13 0 L 13 8 L 16 8 Z"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
                     </Viewbox>
                 </Button>
 
@@ -121,6 +172,7 @@
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
                             <Setter Property="Command" Value="{Binding DataContext.RefreshLocalPanelCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
                                     <Setter Property="Command" Value="{Binding DataContext.RefreshServerPanelCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
@@ -133,6 +185,27 @@
                     </Viewbox>
                 </Button>
 
+                <Button ToolTip="Редактировать файл">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                            <Setter Property="Command" Value="{Binding DataContext.EditServerFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PanelType}" Value="{x:Static enums:PanelType.Server}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Viewbox Width="12" Height="12">
+                        <Path Data="M 0 16 L 3 13 L 13 3 L 16 0 L 13 3 L 16 6 L 6 16 Z M 0 16 L 4 16 L 6 14 Z M 10 0 L 13 3"
+                              Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=Button}}" 
+                              StrokeThickness="1.5"/>
+                    </Viewbox>
+                </Button>
 
             </StackPanel>
         </Border>
