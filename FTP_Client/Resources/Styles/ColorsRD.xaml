@@ -10,5 +10,11 @@
     <SolidColorBrush x:Key="ErrorBrush" Color="#FFE53935" />
     <SolidColorBrush x:Key="ListItemSelectedBrush" Color="#FF3F3F41" />
     <SolidColorBrush x:Key="ConsoleBackgroundBrush" Color="#FF1E1E1E" />
-    
+
+
+    <SolidColorBrush x:Key="ScrollBar.Static.Background" Color="#2E2E2E"/>
+    <SolidColorBrush x:Key="ScrollBar.Static.Thumb" Color="#555555"/>
+    <SolidColorBrush x:Key="ScrollBar.MouseOver.Thumb" Color="#777777"/>
+    <SolidColorBrush x:Key="ScrollBar.Pressed.Thumb" Color="#999999"/>
+
 </ResourceDictionary>

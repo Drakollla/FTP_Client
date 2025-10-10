@@ -27,6 +27,7 @@
         <converter:DateConverter x:Key="DateConverter" />
         <converter:IsTxtFileConverter x:Key="IsTxtFileConverter" />
         <converter:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
     <Grid>
@@ -96,6 +97,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -113,10 +115,24 @@
             <views:FilePanelView Grid.Column="2" 
                                  DataContext="{Binding ServerPanel}" />
 
-            <ListBox Grid.Row="1" 
+            <StackPanel Grid.Row="1" 
+                        Grid.ColumnSpan="3"
+                        Width="200"
+                        Margin="10,5"
+                        Visibility="{Binding IsTransferInProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StatusText}" 
+                           Margin="0,0,0,5" 
+                           Foreground="{StaticResource TextBrush}" />
+                
+                <ProgressBar Height="20" 
+                             Value="{Binding CurrentProgress}" />
+            </StackPanel>
+
+            <ListBox Grid.Row="2" 
                      Grid.ColumnSpan="3"
                      Margin="10" 
-                     MinHeight="100" MaxHeight="200"
+                     MinHeight="150"
+                     MaxHeight="200"
                      ItemsSource="{Binding LogMessages}"
                      Style="{StaticResource LogListBox}">
 
