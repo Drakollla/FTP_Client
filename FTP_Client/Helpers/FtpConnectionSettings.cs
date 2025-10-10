@@ -4,10 +4,11 @@ namespace FTP_Client.Helpers
 {
     public class FtpConnectionSettings : ObservableObject
     {
-        private string _host = "ftp.dlptest.com";
+        private string _host;
         private int _port = 21;
-        private string _userName = "dlpuser";
-        private string _password = "rNrKYTX9g7z3RgJRmxWuGHbeu";
+        private string _userName;
+        private string _password;
+
         public string Host
         {
             get => _host;
