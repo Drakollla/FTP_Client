@@ -1,86 +1,67 @@
 # WPF FTP Client
 
-FTP-клиент для Windows, разработанный на платформе .NET 8 с использованием Windows Presentation Foundation (WPF).
+A Windows FTP client developed using Windows Presentation Foundation (WPF).
 
-## Внешний вид и функционал
+## Appearance and Functionality
 
-Приложение представляет собой классический двухпанельный файловый менеджер.
+The application is a classic dual-pane file manager.
 
-![Рабочее окно FTP-клиента](./screenshots/main_window.jpg)
+![FTP Client Main Window](./screenshots/main_window.jpg)
 
-**Ключевые элементы интерфейса:**
+**Key UI Elements:**
 
-*   **Панель подключения (слева)**: Здесь вводятся данные для подключения к FTP-серверу.
-*   **Панель локальных файлов (в центре)**: Отображает файловую систему компьютера.
-*   **Панель удаленных файлов (справа)**: После успешного подключения здесь отображаются файлы и папки на FTP-сервере.
-*   **Панели инструментов**: Над каждой файловой панелью расположены кнопки для навигации (`<`, `>`, `↑`) и управления файлами (создать папку, переименовать, удалить, скачать/загрузить).
-*   **Панель логов (внизу)**: Отображает статус подключения и команды, отправленные на сервер, а также его ответы.
+*   **Connection Panel (left)**: Used to enter connection details for the FTP server.
+*   **Local Files Panel (center)**: Displays the local computer's file system.
+*   **Remote Files Panel (right)**: After a successful connection, this panel displays the files and folders on the FTP server.
+*   **Toolbars**: Above each file panel, there are buttons for navigation (`<`, `>`, `↑`) and file management (create folder, rename, delete, download/upload).
+*   **Log Panel (bottom)**: Shows the connection status, commands sent to the server, and its responses.
 
-## Архитектура и дизайн
+The application is built based on the **MVVM (Model-View-ViewModel)** architectural pattern.
 
-Приложение построено на основе архитектурного паттерна **MVVM (Model-View-ViewModel)**.
+## Project Structure
 
-*   **Model**: Представляет данные приложения (`FileItem.cs`).
-*   **View**: Определяет структуру и внешний вид пользовательского интерфейса (XAML-файлы в папке `Views`).
-*   **ViewModel**: Содержит логику представления и состояние UI. Управляет данными и командами, на которые реагирует View (`MainViewModel.cs`, `FilePanelViewModel.cs`).
+*   `Commands`: Implementation of the Command pattern (e.g., `RelayCommand`) for handling user actions.
+*   `Converters`: Data converters for WPF bindings.
+*   `Enums`: Enumerations defining types and states within the application.
+*   `Helpers`: Helper classes and utilities.
+*   `Models`: Classes describing data entities (e.g., file, log message).
+*   `Resources`: Application resources, including styles (`.xaml`) and custom controls (`Controls`).
+*   `Services`: Services encapsulating business logic (FTP operations, file system access, logging).
+*   `ViewModels`: ViewModel classes that manage UI logic and state.
+*   `Views`: XAML views (windows and user controls).
 
-Ключевые архитектурные решения:
+## How to Run the Project
 
-*   **Dependency Injection (Внедрение зависимостей)**: Логика вынесена в сервисы с интерфейсами (`IFtpService`, `ILoggerService`), что делает код модульным, слабосвязанным.
-*   **Service Layer (Слой сервисов)**: Вся работа с файловой системой, FTP-протоколом и диалоговыми окнами инкапсулирована в отдельных сервисах.
-*   **Commands**: Взаимодействие с пользователем реализовано через команды, что отвязывает логику от конкретных элементов управления.
-
-## Технологический стек
-
-*   **Платформа**: .NET 8
-*   **UI Framework**: WPF (Windows Presentation Foundation)
-*   **Архитектурный паттерн**: MVVM
-*   **Язык**: C#
-
-## Структура проекта
-
-*   `Commands`: Реализация паттерна "Команда" (например, `RelayCommand`) для обработки действий пользователя.
-*   `Converters`: Конвертеры данных для WPF-биндингов.
-*   `Enums`: Перечисления, определяющие типы и состояния в приложении.
-*   `Helpers`: Вспомогательные классы и утилиты.
-*   `Models`: Классы, описывающие сущности данных (файл, сообщение лога).
-*   `Resources`: Ресурсы приложения, включая стили (`.xaml`) и кастомные элементы управления (`Controls`).
-*   `Services`: Сервисы, инкапсулирующие бизнес-логику (работа с FTP, файлами, логгером).
-*   `ViewModels`: ViewModel-классы, управляющие логикой и состоянием UI.
-*   `Views`: XAML-представления (окна и пользовательские элементы управления).
-
-## Как запустить проект
-
-### Требования
+### Requirements
 
 *   [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-*   [Visual Studio 2022](https://visualstudio.microsoft.com/ru/vs/) с установленной рабочей нагрузкой ".NET Desktop Development".
+*   [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the ".NET Desktop Development" workload installed.
 
-### Инструкция по запуску
+### Launch Instructions
 
-1.  **Клонируйте репозиторий.**
+1.   **Clone the repository:**
+    ``` git clone https://github.com/Drakollla/FTP_Client.git```
 
-2.  **Откройте проект в Visual Studio:**
-    Откройте файл `FTP_Client.sln` (или `FTP_Client.csproj`) в Visual Studio 2022.
+4.  **Open the project in Visual Studio:**
+    Open the `FTP_Client.sln` (or `FTP_Client.csproj`) file in Visual Studio 2022.
 
-3.  **Соберите проект:**
-    Нажмите `Ctrl+Shift+B` или выберите в меню `Build -> Build Solution`. Все необходимые зависимости будут восстановлены автоматически.
+5.  **Build the project:**
+    Press `Ctrl+Shift+B` or select `Build -> Build Solution` from the menu. All necessary dependencies will be restored automatically.
 
-4.  **Запустите приложение:**
-    Нажмите `F5` или кнопку "Start" на панели инструментов для запуска приложения в режиме отладки.
+6.  **Run the application:**
+    Press `F5` or click the "Start" button on the toolbar to run the application in debug mode.
 
-    ## Планы по развитию (TODO)
+## Future Plans (TODO)
 
-Проект является завершенным в рамках учебного задания, но имеет потенциал для дальнейшего развития. Ниже перечислены возможные улучшения и новые функции:
+The project is complete as a learning exercise but has potential for further development. Below are possible improvements and new features.
 
-### Ключевые функции
-- [ ] Поддержка безопасных протоколов **SFTP** и **FTPS**.
-- [ ] Реализация очереди для фоновой загрузки и скачивания файлов.
-- [ ] Добавление менеджера для сохранения профилей подключения.
-- [ ] Функция синхронизации каталогов.
+### Key Features
+- [ ] Support for secure protocols **SFTP** and **FTPS**.
+- [ ] Implement a queue for background file uploads and downloads.
+- [ ] Add a manager to save connection profiles.
+- [ ] Implement a directory synchronization feature.
 
-### Улучшения интерфейса
-- [ ] Поддержка перетаскивания файлов (Drag-and-Drop) между панелями.
-- [ ] Добавить контекстное меню.
-- [ ] Добавление светлой темы оформления.
-
+### UI Improvements
+- [ ] Support for Drag-and-Drop between panels.
+- [ ] Add a context menu for files and folders.
+- [ ] Add a light theme option.
